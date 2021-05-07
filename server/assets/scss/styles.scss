@@ -1,0 +1,22 @@
+@import "config/variables.scss";
+@import "config/reset.scss";
+
+@import "pages/dataDetail.scss";
+@import "pages/home.scss";
+
+@import "partials/header.scss";
+@import "partials/form.scss";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin-top: 120px;
+  width: 100%;
+  background-color: #ffffff;
+  .boards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

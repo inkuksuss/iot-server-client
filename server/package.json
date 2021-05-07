@@ -1,0 +1,58 @@
+{
+  "name": "iotserver",
+  "version": "1.0.0",
+  "description": "IOT 서버실무",
+  "main": "index.js",
+  "scripts": {
+    "dev:server": "nodemon --exec babel-node init.js --delay 2 '.scss' --ignore 'static'",
+    "dev:assets": "WEBPACK_ENV=development webpack -w",
+    "build:assets": "WEBPACK_ENV=production webpack"
+  },
+  "author": "Kim in guk",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/core": "^7.13.15",
+    "@babel/node": "^7.13.13",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.13.15",
+    "axios": "^0.21.1",
+    "babel-loader": "^8.2.2",
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "helmet": "^4.4.1",
+    "jsonwebtoken": "^8.5.1",
+    "mini-css-extract-plugin": "^1.4.1",
+    "mongoose": "^5.12.3",
+    "morgan": "^1.10.0",
+    "mqtt": "^4.2.6",
+    "multer": "^1.4.2",
+    "socket.io": "^4.0.1",
+    "webpack-cli": "^4.6.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.2.5",
+    "css-loader": "^5.2.1",
+    "eslint": "^7.24.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.3.1",
+    "nodemon": "^2.0.7",
+    "postcss": "^8.2.10",
+    "postcss-loader": "^5.2.0",
+    "postcss-plugin": "^1.0.0",
+    "prettier": "^2.2.1",
+    "sass": "^1.32.8",
+    "sass-loader": "^11.0.1",
+    "style-loader": "^2.0.0",
+    "webpack": "^5.32.0"
+  },
+  "browserslist": [
+    "cover 99.5%"
+  ]
+}
