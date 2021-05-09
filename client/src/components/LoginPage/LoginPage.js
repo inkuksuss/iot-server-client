@@ -26,7 +26,7 @@ function LoginPage(props) {
         dispatch(loginUser(body))
             .then(response => {
                 if (response.payload.success) {
-                    props.history.push('/')
+                        window.location.replace('/')
             } else {
                 alert(response.payload.message)
             }

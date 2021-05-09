@@ -5,7 +5,8 @@ import {
     JOIN_USER,
     AUTH_USER,
     CHANGE_PASSWORD,
-    ADD_KEY
+    ADD_KEY,
+    LOGOUT
 } from '../_actions/types';
 
 export default function (state = {}, action) {
@@ -16,6 +17,8 @@ export default function (state = {}, action) {
             return { ...state, success: action.payload };
         case AUTH_USER:
             return { ...state, userData: action.payload };
+        case LOGOUT:
+            return {...state, userData: {}};
         case CHANGE_PASSWORD:
             return {...state, success: action.payload};
         case ADD_KEY:

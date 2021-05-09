@@ -4,7 +4,8 @@ import {
     JOIN_USER,
     AUTH_USER,
     CHANGE_PASSWORD,
-    ADD_KEY
+    ADD_KEY,
+    LOGOUT
 } from './types';
 
 const api = axios.create({
@@ -58,6 +59,18 @@ export function addKey(dataToSubmit) {
         .then(response => response.data)
     return {
         type: ADD_KEY,
+        payload: request
+    }
+};
+
+export function logout() {
+    const request = api.get('/logout')
+        .then(response => {
+            console.log(response);
+            return response.data
+        })
+    return {
+        type: LOGOUT,
         payload: request
     }
 };

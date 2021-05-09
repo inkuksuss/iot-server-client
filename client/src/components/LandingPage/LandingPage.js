@@ -1,18 +1,23 @@
 import React from 'react'
 import axios from 'axios';
+import { useDispatch } from "react-redux";
 import { withRouter } from 'react-router-dom'; 
+import { logout } from '_actions/user_action';
 
 function LandingPage(props) {
-
-    const onClickHandler = () => {
-        axios.get(`http://localhost:3001/logout`, { withCredentials: true })
+    const dispatch = useDispatch();
+    const onClickHandler = (event) => {
+        event.preventDefault();
+        dispatch(logout())
             .then(response => {
-                if (response.data.success) {
+                console.log(response)
+                if (response.payload.success) {
                     props.history.push("/login");
                 } else {
                     alert('로그아웃 실패');
                 }
             })
+        window.localStorage.setItem('persist:root','');
     };
 
     return (
