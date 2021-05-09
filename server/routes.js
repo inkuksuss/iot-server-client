@@ -12,6 +12,7 @@ const USER_DETAIL = "/:id";
 const EDIT_PROFILE = "/edit-profile";
 const CHANGE_PASSWORD = "/change-password";
 const ME = "/me";
+const ADD_KEY = "/addKey";
 
 // data
 const DATAS = "/data";
@@ -42,6 +43,7 @@ const routes = {
     editProfile: EDIT_PROFILE,
     changePassword: CHANGE_PASSWORD,
     me: ME,
+    addKey: ADD_KEY,
     
     //Datas
     data: DATAS,

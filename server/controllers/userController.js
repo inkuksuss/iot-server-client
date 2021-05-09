@@ -1,5 +1,6 @@
 import routes from "../routes";
 import User from "../models/User";
+import { keyContainer } from './globalController';
 
 // Users
 export const getMe =  async (req, res) => {
@@ -9,6 +10,7 @@ export const getMe =  async (req, res) => {
     console.log(req.user);
     try {
         const user = await User.findById(id)
+        console.log(user);
         res.json({ user })
     } catch(err) {
         res.json({ error: "해당 페이지를 찾을 수 없습니다."});
@@ -59,25 +61,22 @@ export const postChangePassword =  async (req,res) => {
                 Password2,
                 userId
             }
-        } = req;
-    console.log(req);
+    } = req;
     try {
-        if(!userId) {
+        if(!userId || !Password || !Password2 || !oldPassword) {
             return res.json({
                 success: false, 
-                message: "유저정보를 찾을 수 없습니다."
+                message: "모든 정보를 입력해주세요😅"
             })
         }
         if(Password !== Password2) {
             return res.json({
                 success: false, 
-                message: "비밀번호 확인이 일치하지 않습니다."
+                message: "비밀번호 확인이 일치하지 않습니다😅"
             })
         }
         const user = await User.findById(userId);
-        console.log(user)
         const checkPassword = await user.checkPassword(oldPassword);
-        console.log(checkPassword)
         if(!checkPassword) {
             return res.json({ 
                 success: false,
@@ -94,8 +93,52 @@ export const postChangePassword =  async (req,res) => {
     } catch(err) {
         res.json({ 
             success: false,
-            error: '에러 발생'
+            error: '에러 발생😅'
         })
     }
 };
    
+export const postAddKey = async (req, res) => {
+    const {
+        body: { 
+            userId, 
+            newKey 
+        }
+    } = req;
+    console.log(userId, newKey);
+    try{
+        if(!userId || !newKey) {
+            return res.json({
+                success: false,
+                message: "모든 정보를 입력해주세요😅"
+            })
+        }
+        const user = await User.findById(userId)
+        // console.log(keyContainer);
+        // console.log(user.key);
+        if(user.key.indexOf(newKey) >= 0) {
+            return res.json({
+                success: false,
+                message: "이미 등록하신 제품번호입니다😅"
+            })
+        }
+        if(keyContainer.indexOf(newKey) < 0) {
+            return res.json({
+                success: false,
+                message: "등록되지 않은 제품번호입니다😅"
+            });
+        }
+        console.log(user.key.length);
+        await User.findByIdAndUpdate(userId, {$addToSet: {key: newKey }});
+        user.save();
+        res.json({
+            success: true,
+            message: "제품 등록 완료!"
+        });
+    } catch(err) {
+        res.json({
+            success: false,
+            error: "알수없는 오류가 발생했습니다😅"
+        });
+    }
+}

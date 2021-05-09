@@ -34,8 +34,6 @@ export function joinUser(dataToSubmit) {
     }
 };
 
-
-
 export function auth() {
 
     const request = api.get('/auth')
@@ -49,9 +47,17 @@ export function auth() {
 export function changePassword(dataToSubmit) {
     const request = api.post('/users/change-password',dataToSubmit)
         .then(response => response.data)
-        console.log(request);
     return {
         type: CHANGE_PASSWORD,
+        payload: request
+    }
+};
+
+export function addKey(dataToSubmit) {
+    const request = api.post('/users/addKey', dataToSubmit)
+        .then(response => response.data)
+    return {
+        type: ADD_KEY,
         payload: request
     }
 };

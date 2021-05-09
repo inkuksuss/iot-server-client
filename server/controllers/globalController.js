@@ -1,6 +1,6 @@
 import User from "../models/User";
 
-let keyContainer = ["1","2","3","4","5"];
+export let keyContainer = ["1","2","3","4","5"];
 
 // Global
 export const postJoin = async (req, res) => {
