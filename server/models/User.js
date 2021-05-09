@@ -5,9 +5,16 @@ import jwt from "jsonwebtoken";
 const UserSchema = new mongoose.Schema({
     name: String,
     email: String,
-    avatar: String,
     hashedPassword: String,
-    token: String,
+    token: {
+        type: String,
+        default: ""
+    },
+    key: [
+        {
+            type: String,
+        }
+    ],
     datas: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -41,18 +48,14 @@ UserSchema.methods.generateToken = function(user) {
         { expiresIn: '7d' }
     );
     user.token = token;
-    user.save();
     return token;
 }; // 유저저장
 
 UserSchema.statics.findByToken = (token) => {
-    console.log(token)
     if(token) {
-        const decoded = jwt.verify(token ? token : "", process.env.JWT_SECRET);
-        console.log(decoded);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         return decoded;
     }
-    
 };
 
 UserSchema.statics.findByEmail = function(email) {

@@ -5,7 +5,6 @@ import { withRouter } from 'react-router-dom';
 
 function LoginPage(props) {
     const dispatch = useDispatch();
-
     const [Email, setEmail] = useState("")
     const [Password, setPassword] = useState("")
 
@@ -20,19 +19,19 @@ function LoginPage(props) {
     const onSubmitHandler = (event) => {
         event.preventDefault();
 
-        let body = {
+        const body = {
             email: Email,
             password: Password
         }
-
         dispatch(loginUser(body))
             .then(response => {
                 if (response.payload.success) {
                     props.history.push('/')
-                } else {
-                    alert('Error˝')
-                }
-            })
+            } else {
+                alert(response.payload.message)
+            }
+        })
+
     }
 
     return (
@@ -56,4 +55,5 @@ function LoginPage(props) {
     )
 }
 
-export default withRouter(LoginPage)
+export default withRouter(LoginPage);
+

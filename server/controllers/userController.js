@@ -6,11 +6,12 @@ export const getMe =  async (req, res) => {
     const { 
         user: { id }
     } = req;
+    console.log(req.user);
     try {
         const user = await User.findById(id)
-        res.render("userDetail", { pageTitle: "User Detail", user });
+        res.json({ user })
     } catch(err) {
-        res.redirect(routes.home);
+        res.json({ error: "해당 페이지를 찾을 수 없습니다."});
     }
 };
 
@@ -50,28 +51,51 @@ export const postEditProfile = async (req, res) => {
     }
 };
 
-export const getChangePassword = (req,res) => {
-     res.render("changePassword", { pageTitle: "Change Paasword" })};
-
 export const postChangePassword =  async (req,res) => {
     const { body:
             {
                 oldPassword,
-                newPassword,
-                newPassword1
+                Password,
+                Password2,
+                userId
             }
         } = req;
+    console.log(req);
     try {
-        if(newPassword !== newPassword1) {
-            res.status(400);
-            res.redirect(`/users${routes.changePassword}`);
-            return;
+        if(!userId) {
+            return res.json({
+                success: false, 
+                message: "유저정보를 찾을 수 없습니다."
+            })
         }
-        await req.user.changePassword(oldPassword, newPassword1);
-        res.redirect(routes.me);
+        if(Password !== Password2) {
+            return res.json({
+                success: false, 
+                message: "비밀번호 확인이 일치하지 않습니다."
+            })
+        }
+        const user = await User.findById(userId);
+        console.log(user)
+        const checkPassword = await user.checkPassword(oldPassword);
+        console.log(checkPassword)
+        if(!checkPassword) {
+            return res.json({ 
+                success: false,
+                message: "기존 비밀번호를 확인해주세요😅"
+            });
+        }
+        const newPassword = await user.setPassword(Password);
+        await User.findByIdAndUpdate(userId, {hashedPassword: newPassword});
+        user.save();
+        res.json({
+            success: true,
+            message: "비밀번호 변경 성공"
+        })
     } catch(err) {
-        res.status(400);
-        res.redirect(`/users${routes.changePassword}`);
+        res.json({ 
+            success: false,
+            error: '에러 발생'
+        })
     }
 };
    

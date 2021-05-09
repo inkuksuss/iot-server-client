@@ -10,7 +10,6 @@ userRouter
     .post(routes.editProfile, uploadAvatar, postEditProfile);
 
 userRouter
-    .get(routes.changePassword, getChangePassword)  
     .post(routes.changePassword, postChangePassword);
 
 userRouter.get(routes.userDetail(), userDetail);

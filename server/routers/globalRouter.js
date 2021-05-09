@@ -20,7 +20,6 @@ globalRouter.get(routes.auth, jwtMiddleware, auth);
         
 globalRouter.get(routes.logout, jwtMiddleware, logout);
 
-globalRouter.get(routes.me, getMe);
-globalRouter.get(routes.search, search);
+globalRouter.get(routes.me, jwtMiddleware, getMe);
 
 export default globalRouter;

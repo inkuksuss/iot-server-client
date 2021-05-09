@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const DataSchema = new mongoose.Schema({
     humidity: Number,
     degree: Number,
+    dust: Number,
     measuredAt: {
         type: Date,
         default: Date.now
