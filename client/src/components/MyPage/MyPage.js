@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addKey, addKeyArray, changePassword } from '../../_actions/user_action';
 import MyPageButton from './MyPageButton';
 
-function MyPage() {
+function MyPage(props) {
     const user = useSelector(state => state.user.userData);
     const dispatch = useDispatch();
     console.log(user.keyList);
@@ -75,6 +75,7 @@ function MyPage() {
                 return alert("서버로부터 데이터를 받지 못했습니다.");
             }
             alert(response.payload.message);
+            window.location.replace('/me');
             setNewKey("");
         });
     };
@@ -85,7 +86,7 @@ function MyPage() {
                 <span>이름:  {user.name}</span>
                 <span>이메일:  {user.email}</span>
                 <ul>{user.keyList ? (user.keyList.map((key) => ( key ? (
-                    <MyPageButton {...key} key={key._id}/>) : 
+                    <MyPageButton props={props} {...key} key={key._id}/>) : 
                     (null)
                 ))) : (null)
                 }</ul>

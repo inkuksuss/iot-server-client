@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { loginUser } from '../../_actions/user_action';
 import { withRouter } from 'react-router-dom';
 
-function LoginPage(props) {
+function LoginPage() {
     const dispatch = useDispatch();
     const [Email, setEmail] = useState("")
     const [Password, setPassword] = useState("")
