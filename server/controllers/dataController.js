@@ -1,5 +1,5 @@
 import routes from "../routes";
-import Data from "../models/Data";
+import Dht from "../models/Dht";
 import User from "../models/User"
 
 
@@ -32,21 +32,21 @@ export const search = async(req, res) => {
     res.render("Search", { pageTitle: "Searching", searchingBy })
 };
 
-export const datas = (req, res) => {
-    res.render("datas", { pageTitle: "Data" })
-};
+// export const datas = (req, res) => {
+//     res.render("datas", { pageTitle: "Data" })
+// };
 
-export const dataDetail = async(req, res) => {
-    const { 
-        params: { id }
-    } = req;
-    try {
-        const data = await findById(id)
-        res.render("dataDetail", { pageTitle: "DataDetail" })
-    } catch(error) {
-        res.redirect(routes.home);
-    }
-};
+// export const dataDetail = async(req, res) => {
+//     const { 
+//         params: { id }
+//     } = req;
+//     try {
+//         const data = await findById(id)
+//         res.render("dataDetail", { pageTitle: "DataDetail" })
+//     } catch(error) {
+//         res.redirect(routes.home);
+//     }
+// };
 
 export const weather = (req, res) => {
     res.render("weather", { pageTitle: "weather" });

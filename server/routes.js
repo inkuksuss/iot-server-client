@@ -8,11 +8,10 @@ const SEARCH = "/search";
 
 // Users
 const USERS = "/users";
-const USER_DETAIL = "/:id";
-const EDIT_PROFILE = "/edit-profile";
 const CHANGE_PASSWORD = "/change-password";
 const ME = "/me";
 const ADD_KEY = "/addKey";
+const DELETE_KEY = "/deleteKey";
 
 // data
 const DATAS = "/data";
@@ -33,17 +32,10 @@ const routes = {
 
     //Users
     users: USERS,
-    userDetail: id => {
-        if (id) {
-          return `/users/${id}`;
-        } else {
-          return USER_DETAIL;
-        }
-    },
-    editProfile: EDIT_PROFILE,
     changePassword: CHANGE_PASSWORD,
     me: ME,
     addKey: ADD_KEY,
+    deleteKey: DELETE_KEY,
     
     //Datas
     data: DATAS,

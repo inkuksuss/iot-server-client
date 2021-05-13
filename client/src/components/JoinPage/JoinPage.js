@@ -50,6 +50,7 @@ function JoinPage(props) {
         dispatch(joinUser(body))
             .then(response => {
                 if (response.payload.success) {
+                    alert(response.payload.message);
                     props.history.push("/login");
                 } else {
                     alert(response.payload.message);

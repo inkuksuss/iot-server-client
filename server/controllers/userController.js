@@ -1,55 +1,16 @@
-import routes from "../routes";
 import User from "../models/User";
-import { keyContainer } from './globalController';
+import Product from "../models/Product"
 
 // Users
 export const getMe =  async (req, res) => {
     const { 
         user: { id }
     } = req;
-    console.log(req.user);
     try {
         const user = await User.findById(id)
-        console.log(user);
         res.json({ user })
     } catch(err) {
         res.json({ error: "해당 페이지를 찾을 수 없습니다."});
-    }
-};
-
-// Users
-export const userDetail = async (req, res) => {
-    const {
-      params: { id }
-    } = req;
-    try {
-      const user = await User.findById(id);
-      res.render("userDetail", { pageTitle: "User Detail", user });
-    } catch (error) {
-      res.redirect(routes.home);
-    }
-};
-
-export const getEditProfile = (req, res) => {
-     res.render("editProfile", { pageTitle: "Edit Profile" })};
-
-export const postEditProfile = async (req, res) => {
-    const {
-         body: {    
-            name,
-            email
-         },
-         file
-    } = req;    /////////////////////////////// req.user로 하면 에러뜸 why?
-    try {
-        await User.findByIdAndUpdate({_id: req.user._id}, {$set: {  
-            name,
-            email,
-            avatar: (file ? file.path : req.user.avatar)
-        }}, {new: true});
-        res.redirect(routes.me);
-    } catch (err) {
-        res.redirect(routes.editProfile);
     }
 };
 
@@ -84,7 +45,7 @@ export const postChangePassword =  async (req,res) => {
             });
         }
         const newPassword = await user.setPassword(Password);
-        await User.findByIdAndUpdate(userId, {hashedPassword: newPassword});
+        await User.findByIdAndUpdate(userId, { hashedPassword: newPassword });
         user.save();
         res.json({
             success: true,
@@ -105,7 +66,6 @@ export const postAddKey = async (req, res) => {
             newKey 
         }
     } = req;
-    console.log(userId, newKey);
     try{
         if(!userId || !newKey) {
             return res.json({
@@ -114,24 +74,22 @@ export const postAddKey = async (req, res) => {
             })
         }
         const user = await User.findById(userId)
-        // console.log(keyContainer);
-        // console.log(user.key);
-        if(user.key.indexOf(newKey) >= 0) {
+        const existedKey = await Product.findOne({ keyName: newKey });
+        if(existedKey) {
             return res.json({
                 success: false,
-                message: "이미 등록하신 제품번호입니다😅"
-            })
-        }
-        if(keyContainer.indexOf(newKey) < 0) {
-            return res.json({
-                success: false,
-                message: "등록되지 않은 제품번호입니다😅"
+                message: "이미 등록된 제품번호입니다😅"
             });
         }
-        console.log(user.key.length);
-        await User.findByIdAndUpdate(userId, {$addToSet: {key: newKey }});
-        user.save();
+        const key = await Product.create({
+            keyName: newKey,
+            user: userId
+        })
+        await user.keyList.push(key.id);
+        await user.save();
+        // await User.findByIdAndUpdate(userId, {$addToSet: { keyList: key.id }});
         res.json({
+            data: key,
             success: true,
             message: "제품 등록 완료!"
         });
@@ -139,6 +97,33 @@ export const postAddKey = async (req, res) => {
         res.json({
             success: false,
             error: "알수없는 오류가 발생했습니다😅"
+        });
+    }
+};
+
+export const postDeleteKey = async(req, res) => {
+    const {
+        body,
+        user: { _id: userId }
+    } = req;
+    const id = Object.keys(body)[0]
+    console.log(id)
+    try {
+        const product = await Product.findById(id);
+        console.log(product.user);
+        console.log(userId)
+        if(String(product.user) === String(userId)) {
+            await Product.findByIdAndDelete(id);
+            await User.findByIdAndUpdate(userId, {$pull: { keyList: id }});
+            res.json({
+                success: true,
+                message: "삭제 성공"
+            });
+        }
+    } catch (err) {
+        res.json({
+            success: false,
+            message: "삭제 실패"
         });
     }
 }

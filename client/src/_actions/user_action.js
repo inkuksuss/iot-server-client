@@ -5,7 +5,9 @@ import {
     AUTH_USER,
     CHANGE_PASSWORD,
     ADD_KEY,
-    LOGOUT
+    LOGOUT,
+    ADD_KEY_ARRAY,
+    DELETE_KEY
 } from './types';
 
 const api = axios.create({
@@ -38,7 +40,10 @@ export function joinUser(dataToSubmit) {
 export function auth() {
 
     const request = api.get('/auth')
-        .then(response => response.data)
+        .then(response => {
+            console.log(response.data);
+            return response.data
+        })
     return {
         type: AUTH_USER,
         payload: request
@@ -66,7 +71,6 @@ export function addKey(dataToSubmit) {
 export function logout() {
     const request = api.get('/logout')
         .then(response => {
-            console.log(response);
             return response.data
         })
     return {
@@ -74,3 +78,19 @@ export function logout() {
         payload: request
     }
 };
+
+export function addKeyArray(keyName) {
+    return {
+        type: ADD_KEY_ARRAY,
+        payload: keyName
+    }
+}
+
+export function deleteKey(id) {
+    const request = api.post('/users/deleteKey', id)
+        .then(response => response.data)
+    return {
+        type: DELETE_KEY,
+        payload: request
+    }
+}

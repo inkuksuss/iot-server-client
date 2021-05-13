@@ -10,12 +10,14 @@ export const uploadAvatar = multerAvatar.single("avatar")
 const jwtMiddleware = async (req, res, next) => {
   const token = req.cookies['access_token'];
   if(!token) {
-    return;
+    return res.json({
+      isAuth: false
+    })
   }
   try{
     const userToken = await User.findByToken(token);
     const user = await User.findOne({ token });
-    if(userToken && user){
+    if(userToken && user) {
       if(userToken._id === String(user._id)) {
         req.user = user;
         req.token = token;

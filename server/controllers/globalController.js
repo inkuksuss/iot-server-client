@@ -1,6 +1,5 @@
 import User from "../models/User";
-
-export let keyContainer = ["1","2","3","4","5"];
+import Product from "../models/Product";
 
 // Global
 export const postJoin = async (req, res) => {
@@ -15,11 +14,20 @@ export const postJoin = async (req, res) => {
             )
         }
         const existedUser = await User.findByEmail(email)
+        const existedKey = await Product.findOne({ keyName: key });
         if(existedUser) {
             return (
                 res.json({ 
                     success: false,
                     message: "이미 가입된 이메일입니다😅"
+                })
+            )
+        }
+        if(existedKey) {
+            return (
+                res.json({
+                    success: false,
+                    message: "이미 등록된 키입니다😅"
                 })
             )
         }
@@ -31,26 +39,24 @@ export const postJoin = async (req, res) => {
                 })
             )
         }
-        if(keyContainer.indexOf(key) < 0) {
-            return (
-                res.json({
-                    success: false,
-                    message: "등록되지 않은 제품번호입니다😅"
-                })
-            )
-        }
-        const keyfilter = keyContainer.filter(index => index !== key);
-        keyContainer = keyfilter;
-        const user = new User({
+        const user = await User.create({
             email,
-            name,
-            key,
-            avatar: "null"
+            name
         });
         await user.setPassword(password);
         await user.save();
-        res.status(200)
-            .json({ success: true })
+        const product = await Product.create({
+            keyName: key,
+            data: [],
+            user: user.id
+        });
+        await product.save();
+        user.keyList.push(product.id);
+        user.save();
+        res.json({ 
+            success: true,
+            message: "회원가입에 성공하셨습니다."
+        })
     } catch(err) {
         console.log(err);
     }
@@ -99,23 +105,35 @@ export const postLogin = async (req, res) => {
     };
 };
 
-export const auth = (req, res) => {
+export const auth = async(req, res) => {
+    let keyInfos = [];
     const {
         user: {
             id,
             name,
             email,
-            key
+            keyList: keyId
         }
     } = req;
-    res.status(200)
-        .json({
-            id,
-            name,
-            email,
-            key,
-            isAuth: true
+    try {
+        for(const key of keyId) {
+            const keyInfo = await Product.findById(key);
+            keyInfos.push(keyInfo);
+        }
+        res.status(200)
+            .json({
+                id,
+                name,
+                email,
+                keyList: keyInfos,
+                isAuth: true
+            });
+    } catch(err) {
+        res.json({
+            isAuth: false,
+            error: err
         });
+    }
 };
 
 export const logout = async (req, res) => {

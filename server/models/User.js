@@ -10,9 +10,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
-    key: [
+    keyList: [
         {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product'
         }
     ],
     datas: [

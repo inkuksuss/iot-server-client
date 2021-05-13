@@ -3,7 +3,8 @@ import socket from 'socket.io';
 import mqtt from "mqtt";
 import "./db";
 import app from './app';
-import "./models/Data";
+import Dht from "./models/Dht";
+import Pms from "./models/Pms";
 import "./models/User";
 
 dotenv.config();
@@ -17,32 +18,39 @@ const handleListing = () =>
 const server = app.listen(PORT, handleListing);
 
 //mqtt server
-const client = mqtt.connect("mqtt://127.0.0.1");
+// const client = mqtt.connect("mqtt://127.0.0.1");
 
-client.on("connect", () => {
-    console.log("😇Mqtt Connect");
-    client.subscribe('example'); // 읽을 토픽
-});
+// client.on("connect", () => {
+//     console.log("😇Mqtt Connect");
+//     client.subscribe('jb/shilmu/scle/smenco/apsr/+/input/+'); // 읽을 토픽
+// });
 
-// client.on("message", (example, message) => {
-//     const obj = JSON.parse(message);
-//     const date = new Date();
-//     const year = date.getFullYear();
-//     const month = date.getMonth();
-//     const today = date.getDate();
-//     const hours = date.getHours();
-//     const mintues = date.getMinutes();
-//     const seconds = date.getSeconds();
-//     obj.createdAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
-//     const dht11 = new DHT11({
-//         tmp: obj.tmp,
-//         hum: obj.hum,
-//         createdAt: obj.createdAt,
-//         key: obj.key
+// const pmsTopic = "jb/shilmu/scle/smenco/apsr/+/input/pms"
+// const dhtTopic = "jb/shilmu/scle/smenco/apsr/key/input/dht"
+// const fanTopic = "jb/shilmu/scle/smenco/apsr/key/output/fan"
+// const ledTopic = "jb/shilmu/scle/smenco/apsr/key/output/led"
+// const speakerTopic = "jb/shilmu/scle/smenco/apsr/key/output/speaker"
+
+// client.on("message", async(topic, message) => {
+//         const productKey = String(topic.substring(27,28));
+//         const productP = String(topic.substring(27,28));
+//         const obj = JSON.parse(message);
+//         const date = new Date();
+//         const year = date.getFullYear();
+//         const month = date.getMonth();
+//         const today = date.getDate();
+//         const hours = date.getHours();
+//         const mintues = date.getMinutes();
+//         const seconds = date.getSeconds();
+//         obj.measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
+//         const pms = await Pms.create({
+//         dust: obj.dust,
+//         measuredAt: obj.measuredAt,
+//         key: productKey
 //     });
-//     console.log(dht11);
+//     console.log(pms);
 //     try{
-//         dht11.save();
+//         pms.save();
 //         console.log('Success MQTT');
 //     } catch (err) {
 //         console.log({ message: err });

@@ -1,31 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { addKey, changePassword } from '../../_actions/user_action';
+import { addKey, addKeyArray, changePassword } from '../../_actions/user_action';
+import MyPageButton from './MyPageButton';
 
-function MyPage(props) {
+function MyPage() {
     const user = useSelector(state => state.user.userData);
     const dispatch = useDispatch();
+    console.log(user.keyList);
     const [oldPassword, setOldPassword] = useState("");
     const [Password, setPassword] = useState("");
     const [Password2, setPassword2] = useState("");
     const [newKey, setNewKey] = useState("");
-
+    
     const onOldPasswordHandler = (event) => {
         setOldPassword(event.currentTarget.value);
     }
-
+    
     const onPasswordHandler = (event) => {
         setPassword(event.currentTarget.value);
     }
-
+    
     const onPasswordHandler2 = (event) => {
         setPassword2(event.currentTarget.value);
     }
-
+    
     const onKeyHandler = (event) => {
         setNewKey(event.currentTarget.value);
     }
-
+    
     const onPasswordSubmitHandler = (event) => {
         event.preventDefault();
         if (!oldPassword || !Password || !Password2) {
@@ -37,7 +39,7 @@ function MyPage(props) {
             setPassword2("");
             return alert('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
         }
-
+        
         const body = {
             oldPassword,
             Password,
@@ -45,40 +47,48 @@ function MyPage(props) {
             userId: user.id
         }
         dispatch(changePassword(body))
-            .then(response => {
-                if (!response.payload) {
-                    return alert("서버로부터 데이터를 받지 못했습니다.");
-                }
-                alert(response.payload.message);
-            })
+        .then(response => {
+            if (!response.payload) {
+                return alert("서버로부터 데이터를 받지 못했습니다.");
+            }
+            alert(response.payload.message);
+            setOldPassword("");
+            setPassword2("");
+            setPassword("");
+        })
     }
-
+    
     const onNewKeySubmitHandler = (event) => {
         event.preventDefault();
         if(!newKey) {
             return alert("제품번호를 입력해주세요.");
         }
-
+        
         const body = {
             userId: user.id,
             newKey 
         }
-
+        
         dispatch(addKey(body))
-            .then(response => {
-                if (!response.payload) {
-                    return alert("서버로부터 데이터를 받지 못했습니다.");
-                }
-                alert(response.payload.message);
-            });
-    }
-
+        .then(response => {
+            if (!response.payload) {
+                return alert("서버로부터 데이터를 받지 못했습니다.");
+            }
+            alert(response.payload.message);
+            setNewKey("");
+        });
+    };
+    
     return (
         <>
             <div style={{marginTop:"50px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"space-around", height:"150px"}}>
                 <span>이름:  {user.name}</span>
                 <span>이메일:  {user.email}</span>
-                <span>제품번호:  {user.key}</span>
+                <ul>{user.keyList ? (user.keyList.map((key) => ( key ? (
+                    <MyPageButton {...key} key={key._id}/>) : 
+                    (null)
+                ))) : (null)
+                }</ul>
             </div>
             <div style={{marginTop: "150px", display: "flex", justifyContent: "space-around"}}>
                 <form onSubmit={onPasswordSubmitHandler} style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start"}}>
