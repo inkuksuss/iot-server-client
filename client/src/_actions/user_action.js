@@ -41,7 +41,6 @@ export function auth() {
 
     const request = api.get('/auth')
         .then(response => {
-            console.log(response.data);
             return response.data
         })
     return {

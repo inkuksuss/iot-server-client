@@ -1,6 +1,6 @@
 import express from "express";
-import { home, postHome, search } from '../controllers/dataController';
-import { postJoin, postLogin, logout, auth } from '../controllers/globalController';
+import { home, postHome } from '../controllers/dataController';
+import { postJoin, postLogin, logout, auth, python } from '../controllers/globalController';
 import { getMe } from '../controllers/userController';
 import jwtMiddleware from '../middleware';
 import routes from "../routes";
@@ -8,9 +8,12 @@ import routes from "../routes";
 
 const globalRouter = express.Router();
 
+globalRouter.get(routes.python, python);
+
 globalRouter
     .get(routes.home, home)
     .post(routes.home, postHome);
+
 
 globalRouter.post(routes.join, postJoin);
 

@@ -1,6 +1,22 @@
 import User from "../models/User";
 import Product from "../models/Product";
+import { PythonShell } from "python-shell";
 
+
+const options = {
+    scriptPath: '/Users/gim-ingug/Documents/iotserver/pythonCgi',
+    pythonPath: 'python3',
+    pythonOptins: ['-u'],
+    args: []
+}
+
+export const python = (req, res) => {
+    PythonShell.run('mongo.py', options, (err, results) => {
+        if(err) console.log(err);
+        res.send(results);
+        console.log(results)
+    })
+};
 // Global
 export const postJoin = async (req, res) => {
     const { name, email, password, confirmPassword, key } = req.body;;
@@ -58,7 +74,7 @@ export const postJoin = async (req, res) => {
             message: "회원가입에 성공하셨습니다."
         })
     } catch(err) {
-        console.log(err);
+        throw Error();
     }
 };
 
@@ -101,7 +117,7 @@ export const postLogin = async (req, res) => {
                 userId: user.id    
             });
     } catch(err) {
-        console.log(err);
+        throw Error();
     };
 };
 

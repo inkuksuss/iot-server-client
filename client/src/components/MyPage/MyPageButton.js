@@ -4,7 +4,6 @@ import { deleteKey } from '_actions/user_action';
 
     function MyPageButton(key) {
         const dispatch = useDispatch();
-        console.log(key);
         const id = key._id;
         const deleteBtn = () => {
             dispatch(deleteKey(id))

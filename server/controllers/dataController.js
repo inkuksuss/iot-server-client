@@ -3,6 +3,8 @@ import Dht from "../models/Dht";
 import User from "../models/User"
 
 
+
+
 export const home = (req, res) => {
     res.render("home", { pageTitle: "Home" })
 };
@@ -19,17 +21,6 @@ export const postHome = async (req, res) => {
         console.log(err);
         res.redirect(routes.login);
     }
-};
-
-export const search = async(req, res) => {
-    const { 
-        query: { term: searchingBy }
-    } = req;
-    try {
-    } catch(err) {
-        console.log(err);
-    }
-    res.render("Search", { pageTitle: "Searching", searchingBy })
 };
 
 // export const datas = (req, res) => {

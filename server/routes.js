@@ -5,6 +5,7 @@ const LOGIN = "/login";
 const AUTH = "/auth";
 const LOGOUT = "/logout";
 const SEARCH = "/search";
+const PYTHON = "/python";
 
 // Users
 const USERS = "/users";
@@ -29,6 +30,7 @@ const routes = {
     auth: AUTH,
     logout: LOGOUT,
     search: SEARCH,
+    python: PYTHON,
 
     //Users
     users: USERS,

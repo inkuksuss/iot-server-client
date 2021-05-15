@@ -9,7 +9,6 @@ function LandingPage(props) {
         event.preventDefault();
         dispatch(logout())
             .then(response => {
-                console.log(response)
                 if (response.payload.success) {
                     props.history.push("/login");
                 } else {

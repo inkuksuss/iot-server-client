@@ -6,7 +6,6 @@ import MyPageButton from './MyPageButton';
 function MyPage(props) {
     const user = useSelector(state => state.user.userData);
     const dispatch = useDispatch();
-    console.log(user.keyList);
     const [oldPassword, setOldPassword] = useState("");
     const [Password, setPassword] = useState("");
     const [Password2, setPassword2] = useState("");

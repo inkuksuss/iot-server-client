@@ -107,11 +107,8 @@ export const postDeleteKey = async(req, res) => {
         user: { _id: userId }
     } = req;
     const id = Object.keys(body)[0]
-    console.log(id)
     try {
         const product = await Product.findById(id);
-        console.log(product.user);
-        console.log(userId)
         if(String(product.user) === String(userId)) {
             await Product.findByIdAndDelete(id);
             await User.findByIdAndUpdate(userId, {$pull: { keyList: id }});
