@@ -28,7 +28,7 @@ export default function (state = {}, action) {
         case DELETE_KEY:
             return {...state, success: action.payload};
         case USER_DEVICE:
-            return {...state, deviceData: action.payload};
+            return {...state, data: action.payload};
         default:
             return state;
     }

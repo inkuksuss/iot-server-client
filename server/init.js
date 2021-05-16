@@ -45,15 +45,16 @@ client.on("message", async (topic, message) => {
                 console.log(product.user)
                 if(product && product.keyName === obj.key){
                     if(product.user) {
-                        const id = product.user;
+                        const userId = product.user;
                         const pms = await Pms.create({
                             dust: obj.dust,
                             measuredAt: obj.measuredAt,
-                            key: obj.key
+                            key: obj.key,
+                            controller: userId
                         });
                         await pms.save();
                         await Product.findOneAndUpdate({ keyName }, {$addToSet: {data: pms._id}});
-                        await User.findByIdAndUpdate({ id }, {$addToSet: { datas: dht._id}});
+                        await User.findByIdAndUpdate({ _id: userId }, {$addToSet: { datas: dht._id}});
                         console.log(pms);
                         console.log('Success MQTT');
                     }
@@ -77,16 +78,17 @@ client.on("message", async (topic, message) => {
                 const product = await Product.findOne({ keyName: keyName });
                 if(product && product.keyName === obj.key){
                     if(product.user) {
-                        const id = product.user;
+                        const userId = product.user;
                         const dht = await Dht.create({
                             tmp: obj.tmp,
                             hum: obj.hum,
                             measuredAt: obj.measuredAt,
-                            key: obj.key
+                            key: obj.key,
+                            controller: userId
                         });
                         await dht.save();
                         await Product.findOneAndUpdate({ keyName }, {$addToSet: { data: dht._id }});
-                        await User.findByIdAndUpdate({ _id: id }, {$addToSet: { datas: dht._id }});
+                        await User.findByIdAndUpdate({ _id: userId }, {$addToSet: { datas: dht._id }});
                         console.log(dht);
                         console.log('Success MQTT');
                     }
@@ -102,17 +104,22 @@ client.on("message", async (topic, message) => {
     }
 });
 
-// //웹소켓서버
-// const io = socketIO(server);
+//웹소켓서버
+const io = socketIO(server, {
+    cors: {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"]
+    }
+});
 
-// io.on("connection", socket => {
-//     console.log("😘Socket Connect")
+io.on("connection", socket => {
+    console.log("😘Socket Connect")
     
-//     // Mqtt 데이터
-//     socket.on("mqttSubmit", () => {
-//         Dht.find({}).sort({ _id: -1 }).limit(1).then(res => {
-//             socket.emit("mqttSubmit", JSON.stringify(res[0]))
-//         })
-//     })
-// });
+    // Mqtt 데이터
+    socket.on("mqttSubmit", () => {
+        Dht.find({}).sort({ _id: -1 }).limit(1).then(res => {
+            socket.emit("mqttSubmit", JSON.stringify(res[0]))
+        })
+    })
+});
 

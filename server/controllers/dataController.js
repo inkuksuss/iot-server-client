@@ -2,34 +2,41 @@ import routes from "../routes";
 import Dht from "../models/Dht";
 import User from "../models/User"
 import { PythonShell } from "python-shell";
+import cookieParser from 'cookie-parser';
+import { json } from 'body-parser';
 
-const options = {
-    scriptPath: '/Users/gim-ingug/Documents/iotserver/pythonCgi',
-    pythonPath: 'python3',
-    pythonOptins: ['-u'],
-    args: ['']
-}
+const scriptPath = '/Users/gim-ingug/Documents/iotserver/pythonCgi'
 
-export const python = (req, res) => {
-    PythonShell.run('mongo.py', options, (err, results) => {
-        if(err) console.log(err);
-        res.send(results);
-        console.log(results)
-    })
-};
+// export const python = (req, res) => {
+    // PythonShell.run('mongo.py', options, (err, results) => {
+    //     if(err) console.log(err);
+    //     res.send(results);
+    //     console.log(results)
+    // })
+// };
 
 export const dataUser = async(req, res) => {
     const {
         params: { id }
     } = req;
     try {
-        PythonShell.run('mongo.py', options, (err, results) => {
-            if(err) console.log(err);
-            res.send(results);
-            console.log(results)
+        PythonShell.run('DataUser.py', {
+            scriptPath,
+            args: id
+        }, (err, data) => {
+            if(err) {
+                return res.json({ 
+                    success: false,
+                    error: err
+                })
+            }
+            const parseData = JSON.parse(data)
+            res.json({
+                success: true,
+                data: parseData
+            })
         })
-        // const user = await User.findById(id).populate('keyList');
     } catch(err) {
-
+        throw Error();
     }
 };

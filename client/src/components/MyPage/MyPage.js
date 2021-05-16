@@ -85,7 +85,7 @@ function MyPage(props) {
                 <span>이름:  {user.name}</span>
                 <span>이메일:  {user.email}</span>
                 <ul>{user.keyList ? (user.keyList.map((key) => ( key ? (
-                    <MyPageButton props={props} {...key} key={key._id}/>) : 
+                    <MyPageButton {...key} key={key._id}/>) : 
                     (null)
                 ))) : (null)
                 }</ul>
