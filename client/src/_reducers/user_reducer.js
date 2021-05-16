@@ -7,7 +7,8 @@ import {
     CHANGE_PASSWORD,
     ADD_KEY,
     LOGOUT,
-    DELETE_KEY
+    DELETE_KEY,
+    USER_DEVICE
 } from '../_actions/types';
 
 export default function (state = {}, action) {
@@ -26,6 +27,8 @@ export default function (state = {}, action) {
             return {...state, success: action.payload};
         case DELETE_KEY:
             return {...state, success: action.payload};
+        case USER_DEVICE:
+            return {...state, deviceData: action.payload};
         default:
             return state;
     }

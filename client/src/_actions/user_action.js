@@ -6,7 +6,8 @@ import {
     CHANGE_PASSWORD,
     ADD_KEY,
     LOGOUT,
-    DELETE_KEY
+    DELETE_KEY,
+    USER_DEVICE
 } from './types';
 
 const api = axios.create({
@@ -84,4 +85,14 @@ export function deleteKey(id) {
         type: DELETE_KEY,
         payload: request
     }
-}
+};
+
+export function userDevice(id) {
+    console.log(id);
+    const request = api.get(`/data/${id}`)
+        .then(response => response.data)
+    return {
+        type: USER_DEVICE,
+        payload: request
+    }
+};

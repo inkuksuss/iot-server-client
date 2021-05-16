@@ -1,13 +1,11 @@
 import express from 'express';
-import { dataDetail, datas } from '../controllers/dataController';
-import { onlyPrivate } from '../middleware';
+import { dataUser } from '../controllers/dataController';
+import jwtMiddleware from '../middleware';
 import routes from '../routes';
 
 
 const dataRouter = express.Router();
 
-// dataRouter.get(routes.datas, onlyPrivate, datas);
-
-// dataRouter.get(routes.dataDetail(), onlyPrivate, dataDetail);
+dataRouter.get(routes.dataUser(), dataUser);
 
 export default dataRouter;

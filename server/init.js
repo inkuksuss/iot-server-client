@@ -49,17 +49,16 @@ client.on("message", async (topic, message) => {
                         key: obj.key
                     });
                     pms.save();
+                    await Product.findOneAndUpdate({key: keyName}, {$addToSet: {data: pms._id}})
                     console.log(pms);
                     console.log('Success MQTT');
                 }
             } catch (err) {
                 console.log(err);
             }
-        } else {
-            console.log('fail');
-        }
+        } 
 
-        if(topicContainer[6] === 'input' && topicContainer[7] === 'dht' && obj.tmp && obj.hum && typeof(obj.tmp) === "number" && typeof(obj.hum) === "number") {
+        else if(topicContainer[6] === 'input' && topicContainer[7] === 'dht' && obj.tmp && obj.hum && typeof(obj.tmp) === "number" && typeof(obj.hum) === "number") {
             const date = new Date();
             const year = date.getFullYear();
             const month = date.getMonth();
@@ -79,13 +78,16 @@ client.on("message", async (topic, message) => {
                         key: obj.key
                     });
                     dht.save();
+                    await Product.findOneAndUpdate({keyName: keyName}, {$addToSet: { data: dht._id }})
                     console.log(dht);
                     console.log('Success MQTT');
                 }
             } catch (err) {
                 console.log(err);
             }
-        } console.log('fail');
+        } else{
+            console.log('fail');   
+        }
     } else {
         console.log('no key');   
     }

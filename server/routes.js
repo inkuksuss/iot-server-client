@@ -16,7 +16,7 @@ const DELETE_KEY = "/deleteKey";
 
 // data
 const DATAS = "/data";
-const DATA_DETAIL = "/:id/detail";
+const DATA_USER = "/:id";
 
 // API
 const API = "/api";
@@ -41,11 +41,11 @@ const routes = {
     
     //Datas
     data: DATAS,
-    dataDetail: id => {
+    dataUser: id => {
         if (id) {
-          return `/data/${id}/detail`;
+          return `data/${id}`;
         } else {
-          return DATA_DETAIL;
+          return DATA_USER;
         }
     },
     // API

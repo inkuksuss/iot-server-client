@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
 const Header = styled.header`
     color: white;
@@ -36,18 +37,21 @@ const SLink = styled(Link)`
     justify-content: center;
 `;
 
-export default withRouter(({ location: { pathname }}) => (
-    <Header>
-        <List>
-            <Item current={pathname === "/"}>
-                <SLink to="/">홈</SLink>
-            </Item>    
-            <Item current={pathname === "/me"}>
-                <SLink to="/me">내정보</SLink>
-            </Item>
-            <Item current={pathname === "/:id/controller"}>
-                <SLink to="/:id/controller">기기정보</SLink>
-            </Item>
-        </List>
-    </Header>
-));
+export default withRouter(({ location: { pathname }}) => {
+    const userId = useSelector(state => state.user.userData.id)
+    return (
+        <Header>
+            <List>
+                <Item current={pathname === "/"}>
+                    <SLink to="/">홈</SLink>
+                </Item>    
+                <Item current={pathname === "/me"}>
+                    <SLink to="/me">내정보</SLink>
+                </Item>
+                <Item current={pathname === `/data/${userId}`}>
+                    <SLink to= {`/data/${userId}`}>기기정보</SLink>
+                </Item>
+            </List>
+        </Header>
+    )
+});

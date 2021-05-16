@@ -3,20 +3,21 @@ import Product from "../models/Product";
 import { PythonShell } from "python-shell";
 
 
-// const options = {
-//     scriptPath: '/Users/gim-ingug/Documents/iotserver/pythonCgi',
-//     pythonPath: 'python3',
-//     pythonOptins: ['-u'],
-//     args: []
-// }
+const options = {
+    scriptPath: '/Users/gim-ingug/Documents/iotserver/pythonCgi',
+    pythonPath: 'python3',
+    pythonOptins: ['-u'],
+    args: []
+}
 
-// export const python = (req, res) => {
-//     PythonShell.run('mongo.py', options, (err, results) => {
-//         if(err) console.log(err);
-//         res.send(results);
-//         console.log(results)
-//     })
-// };
+export const python = (req, res) => {
+    PythonShell.run('mongo.py', options, (err, results) => {
+        if(err) console.log(err);
+        res.send(results);
+        console.log(results)
+    })
+};
+
 // Global
 export const postJoin = async (req, res) => {
     const { 
@@ -137,15 +138,13 @@ export const auth = async(req, res) => {
             keyList: keyId
         }
     } = req;
-    console.log(req);
     try {
         for(const key of keyId) {
             const keyInfo = await Product.findById(key);
-            console.log(keyInfo);
             keyInfos.push(keyInfo);
         }
-        console.log(keyInfos);
-        return res.json({
+        return res.status(200)
+            .json({
                 id,
                 name,
                 email,
@@ -153,10 +152,9 @@ export const auth = async(req, res) => {
                 isAuth: true
             });
     } catch(err) {
-        console.log(err);
         return res.json({
             isAuth: false,
-            error: 'hello'
+            error: err
         });
     }
 };
@@ -177,7 +175,7 @@ export const logout = async (req, res) => {
     } catch(err) {
         res.json({ 
             success: false, 
-            err 
+            error: err
         });
     } 
 };
