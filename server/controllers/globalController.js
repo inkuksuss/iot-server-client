@@ -3,23 +3,29 @@ import Product from "../models/Product";
 import { PythonShell } from "python-shell";
 
 
-const options = {
-    scriptPath: '/Users/gim-ingug/Documents/iotserver/pythonCgi',
-    pythonPath: 'python3',
-    pythonOptins: ['-u'],
-    args: []
-}
+// const options = {
+//     scriptPath: '/Users/gim-ingug/Documents/iotserver/pythonCgi',
+//     pythonPath: 'python3',
+//     pythonOptins: ['-u'],
+//     args: []
+// }
 
-export const python = (req, res) => {
-    PythonShell.run('mongo.py', options, (err, results) => {
-        if(err) console.log(err);
-        res.send(results);
-        console.log(results)
-    })
-};
+// export const python = (req, res) => {
+//     PythonShell.run('mongo.py', options, (err, results) => {
+//         if(err) console.log(err);
+//         res.send(results);
+//         console.log(results)
+//     })
+// };
 // Global
 export const postJoin = async (req, res) => {
-    const { name, email, password, confirmPassword, key } = req.body;;
+    const { 
+        name, 
+        email, 
+        password, 
+        confirmPassword, 
+        key 
+    } = req.body;
     try {
         if(!name || !email || !password || !confirmPassword || !key) {
             return (
@@ -131,13 +137,15 @@ export const auth = async(req, res) => {
             keyList: keyId
         }
     } = req;
+    console.log(req);
     try {
         for(const key of keyId) {
             const keyInfo = await Product.findById(key);
+            console.log(keyInfo);
             keyInfos.push(keyInfo);
         }
-        res.status(200)
-            .json({
+        console.log(keyInfos);
+        return res.json({
                 id,
                 name,
                 email,
@@ -145,9 +153,10 @@ export const auth = async(req, res) => {
                 isAuth: true
             });
     } catch(err) {
-        res.json({
+        console.log(err);
+        return res.json({
             isAuth: false,
-            error: err
+            error: 'hello'
         });
     }
 };

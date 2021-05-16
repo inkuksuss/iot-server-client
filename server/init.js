@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import socket from 'socket.io';
+import socketIO from 'socket.io';
 import mqtt from "mqtt";
 import "./db";
 import app from './app';
@@ -91,24 +91,15 @@ client.on("message", async (topic, message) => {
     }
 });
 
-// 웹소켓서버
+// //웹소켓서버
 // const io = socketIO(server);
 
 // io.on("connection", socket => {
 //     console.log("😘Socket Connect")
-//     // 채팅  
-//     socket.on("newMessage", ({ message }) => {  
-//         socket.broadcast.emit("messageNotif", {
-//             message,
-//             nickname: socket.nickname || "Inguk"
-//         });
-//     });
-//     socket.on("setNickname", ({ nickname }) => {
-//         socket.nickname = nickname;
-//     });
+    
 //     // Mqtt 데이터
 //     socket.on("mqttSubmit", () => {
-//         DHT11.find({}).sort({ _id: -1 }).limit(1).then(res => {
+//         Dht.find({}).sort({ _id: -1 }).limit(1).then(res => {
 //             socket.emit("mqttSubmit", JSON.stringify(res[0]))
 //         })
 //     })

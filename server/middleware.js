@@ -9,14 +9,17 @@ export const uploadAvatar = multerAvatar.single("avatar")
 // 인증
 const jwtMiddleware = async (req, res, next) => {
   const token = req.cookies['access_token'];
+  console.log(token);
   if(!token) {
     return res.json({
-      isAuth: false
+      isAuth: false,
+      error: "hi"
     })
   }
   try{
     const userToken = await User.findByToken(token);
     const user = await User.findOne({ token });
+    console.log(user)
     if(userToken && user) {
       if(userToken._id === String(user._id)) {
         req.user = user;
@@ -26,7 +29,7 @@ const jwtMiddleware = async (req, res, next) => {
     } 
     return;
   } catch(err) {
-    throw Error();
+    console.log(err);
   }
 };
 

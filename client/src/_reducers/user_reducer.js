@@ -7,7 +7,6 @@ import {
     CHANGE_PASSWORD,
     ADD_KEY,
     LOGOUT,
-    ADD_KEY_ARRAY,
     DELETE_KEY
 } from '../_actions/types';
 
@@ -25,8 +24,6 @@ export default function (state = {}, action) {
             return {...state, success: action.payload};
         case ADD_KEY:
             return {...state, success: action.payload};
-        case ADD_KEY_ARRAY:
-            return {...state, keyName: action.payload};
         case DELETE_KEY:
             return {...state, success: action.payload};
         default:

@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 import { persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import user from './user_reducer';
+
 // import createEncryptor from 'redux-persist-transform-encrypt';
 
 // const encryptor = createEncryptor({

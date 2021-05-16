@@ -15,21 +15,23 @@ import Header from 'components/Header/Header';
 import LoggedHeader from "components/Header/LoggedHeader"
 import { useSelector } from 'react-redux';
 import MyPage from 'components/MyPage/MyPage';
+import DetailPage from 'components/Detail/DetailPage';
 
 
 export default () => {
   const isLogged = useSelector(state => state.user.userData.isAuth);
+  console.log(isLogged);
   return (
     <Router>
         <>
           {isLogged ? <LoggedHeader /> : <Header />}
           <Switch>
-            <Route exact path="/" component={Auth(LandingPage, true)} />
+            <Route exact path="/" component={Auth(LandingPage, null)} />
             <Route exact path="/login" component={Auth(LoginPage, false)} />
             <Route exact path="/join" component={Auth(JoinPage, false)} />
             <Route exact path="/me" component={Auth(MyPage, true)} />
-            <Route exact path="/:id/controller" component={Auth(JoinPage, true)} />
-            <Route exact path="/python" component={PythonPage} />
+            <Route exact path="/:id/controller" component={Auth(DetailPage, true)} />
+            {/* <Route exact path="/python" component={PythonPage} /> */}
           </Switch>
         </>
       </Router>
