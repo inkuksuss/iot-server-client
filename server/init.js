@@ -6,7 +6,7 @@ import app from './app';
 import Dht from "./models/Dht";
 import Pms from "./models/Pms";
 import Product from './models/Product';
-import "./models/User";
+import User from "./models/User";
 
 dotenv.config();
 
@@ -41,17 +41,22 @@ client.on("message", async (topic, message) => {
             obj.measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
             const keyName = String(topicContainer[5])
             try{
-                const existedKey = await Product.findOne({ keyName: keyName });
-                if(existedKey && existedKey.keyName === obj.key){
-                    const pms = await Pms.create({
-                        dust: obj.dust,
-                        measuredAt: obj.measuredAt,
-                        key: obj.key
-                    });
-                    pms.save();
-                    await Product.findOneAndUpdate({key: keyName}, {$addToSet: {data: pms._id}})
-                    console.log(pms);
-                    console.log('Success MQTT');
+                const product = await Product.findOne({ keyName: keyName });
+                console.log(product.user)
+                if(product && product.keyName === obj.key){
+                    if(product.user) {
+                        const id = product.user;
+                        const pms = await Pms.create({
+                            dust: obj.dust,
+                            measuredAt: obj.measuredAt,
+                            key: obj.key
+                        });
+                        await pms.save();
+                        await Product.findOneAndUpdate({ keyName }, {$addToSet: {data: pms._id}});
+                        await User.findByIdAndUpdate({ id }, {$addToSet: { datas: dht._id}});
+                        console.log(pms);
+                        console.log('Success MQTT');
+                    }
                 }
             } catch (err) {
                 console.log(err);
@@ -69,18 +74,22 @@ client.on("message", async (topic, message) => {
             obj.measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
             const keyName = String(topicContainer[5])
             try{
-                const existedKey = await Product.findOne({ keyName: keyName });
-                if(existedKey && existedKey.keyName === obj.key){
-                    const dht = await Dht.create({
-                        tmp: obj.tmp,
-                        hum: obj.hum,
-                        measuredAt: obj.measuredAt,
-                        key: obj.key
-                    });
-                    dht.save();
-                    await Product.findOneAndUpdate({keyName: keyName}, {$addToSet: { data: dht._id }})
-                    console.log(dht);
-                    console.log('Success MQTT');
+                const product = await Product.findOne({ keyName: keyName });
+                if(product && product.keyName === obj.key){
+                    if(product.user) {
+                        const id = product.user;
+                        const dht = await Dht.create({
+                            tmp: obj.tmp,
+                            hum: obj.hum,
+                            measuredAt: obj.measuredAt,
+                            key: obj.key
+                        });
+                        await dht.save();
+                        await Product.findOneAndUpdate({ keyName }, {$addToSet: { data: dht._id }});
+                        await User.findByIdAndUpdate({ _id: id }, {$addToSet: { datas: dht._id }});
+                        console.log(dht);
+                        console.log('Success MQTT');
+                    }
                 }
             } catch (err) {
                 console.log(err);

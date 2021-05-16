@@ -1,18 +1,18 @@
 # import pymongo
 import sys
 import pymongo
+import pandas
 
 connection = pymongo.MongoClient("127.0.0.1", 27017)
 
 db = connection.iotserver
 
-collection = db.users
+dht = db.dhts
 
-docs = collection.find()
+docs = dht.find()
 
 for doc in docs:
     print(doc)
 
 # print(sys.argv[1],sys.argv[2])
-print('heelo')
-sys.stdout.flush()
+# sys.stdout.flush()

@@ -1,22 +1,5 @@
 import User from "../models/User";
 import Product from "../models/Product";
-import { PythonShell } from "python-shell";
-
-
-const options = {
-    scriptPath: '/Users/gim-ingug/Documents/iotserver/pythonCgi',
-    pythonPath: 'python3',
-    pythonOptins: ['-u'],
-    args: []
-}
-
-export const python = (req, res) => {
-    PythonShell.run('mongo.py', options, (err, results) => {
-        if(err) console.log(err);
-        res.send(results);
-        console.log(results)
-    })
-};
 
 // Global
 export const postJoin = async (req, res) => {
