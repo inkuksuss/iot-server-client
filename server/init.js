@@ -8,6 +8,7 @@ import Pms from "./models/Pms";
 import Product from './models/Product';
 import User from "./models/User";
 
+
 dotenv.config();
 
 const PORT = process.env.PORT || 3001;
@@ -42,7 +43,6 @@ client.on("message", async (topic, message) => {
             const keyName = String(topicContainer[5])
             try{
                 const product = await Product.findOne({ keyName: keyName });
-                console.log(product.user)
                 if(product && product.keyName === obj.key){
                     if(product.user) {
                         const userId = product.user;
@@ -50,7 +50,8 @@ client.on("message", async (topic, message) => {
                             dust: obj.dust,
                             measuredAt: obj.measuredAt,
                             key: obj.key,
-                            controller: userId
+                            controller: userId,
+                            product: product._id
                         });
                         await pms.save();
                         await Product.findOneAndUpdate({ keyName }, {$addToSet: {data: pms._id}});
@@ -84,7 +85,8 @@ client.on("message", async (topic, message) => {
                             hum: obj.hum,
                             measuredAt: obj.measuredAt,
                             key: obj.key,
-                            controller: userId
+                            controller: userId,
+                            product: product._id
                         });
                         await dht.save();
                         await Product.findOneAndUpdate({ keyName }, {$addToSet: { data: dht._id }});
@@ -112,14 +114,38 @@ const io = socketIO(server, {
     }
 });
 
+// Mqtt 데이터
 io.on("connection", socket => {
     console.log("😘Socket Connect")
-    
-    // Mqtt 데이터
-    socket.on("mqttSubmit", () => {
-        Dht.find({}).sort({ _id: -1 }).limit(1).then(res => {
-            socket.emit("mqttSubmit", JSON.stringify(res[0]))
+
+        socket.on('disconnect', () => {
+            console.log("🥺Socket Disconnect")
+        });
+
+        socket.on("sendId", async(id) => {
+            const user = id.userId;
+            console.log(user);
+            let dataForm = [];
+            if(user) {
+                try{
+                    const keys = await Dht.find({ controller: user }).distinct('key')
+                    for (const [index, key] of keys.entries()) {
+                        const dht = await Dht.find({ key }).sort({ _id: -1 }).limit(1)
+                        const pms = await Pms.find({ key }).sort({ _id: -1 }).limit(1)
+                        const data = {
+                            tmp: dht[0].tmp,
+                            hum: dht[0].hum,
+                            dust: pms[0].dust,
+                            measuredAt: dht[0].measuredAt,
+                            product: dht[0].product
+                        }
+                        dataForm[index] = data
+                    }
+                        socket.emit("mqttSubmit", JSON.stringify(dataForm))
+                } catch(err) {
+                    console.log(err);
+                }
+            }
         })
-    })
 });
 

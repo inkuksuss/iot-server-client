@@ -10,7 +10,7 @@ const PmsSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
-    rater: {
+    product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product"
     },
