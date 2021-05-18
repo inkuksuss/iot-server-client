@@ -99,7 +99,7 @@ export const postLogin = async (req, res) => {
         user.save();
         res.cookie('access_token', token, {
             maxAge: 1000 * 60 * 60 * 24 * 7,
-            httpOnly: true
+            httpOnly: false
         })
             .status(200)
             .json({ 

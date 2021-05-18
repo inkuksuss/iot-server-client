@@ -7,14 +7,6 @@ import { json } from 'body-parser';
 
 const scriptPath = '/Users/gim-ingug/Documents/iotserver/pythonCgi'
 
-// export const python = (req, res) => {
-    // PythonShell.run('mongo.py', options, (err, results) => {
-    //     if(err) console.log(err);
-    //     res.send(results);
-    //     console.log(results)
-    // })
-// };
-
 export const dataUser = async(req, res) => {
     const {
         params: { id }

@@ -55,7 +55,7 @@ client.on("message", async (topic, message) => {
                         });
                         await pms.save();
                         await Product.findOneAndUpdate({ keyName }, {$addToSet: {data: pms._id}});
-                        await User.findByIdAndUpdate({ _id: userId }, {$addToSet: { datas: dht._id}});
+                        await User.findByIdAndUpdate({ _id: userId }, {$addToSet: { datas: pms._id}});
                         console.log(pms);
                         console.log('Success MQTT');
                     }

@@ -1,11 +1,11 @@
 /* eslint-disable import/no-anonymous-default-export */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Switch,
   Route
 } from "react-router-dom";
-
+import { useCookies, withCookies } from 'react-cookie';
 import LandingPage from 'components/LandingPage/LandingPage'
 import LoginPage from 'components/LoginPage/LoginPage';
 import JoinPage from 'components/JoinPage/JoinPage';
@@ -18,13 +18,24 @@ import MyPage from 'components/MyPage/MyPage';
 import DevicePage from 'components/Device/DevicePage';
 
 
-export default () => {
-  const isLogged = useSelector(state => state.user.userData.isAuth);
-  const userId = useSelector(state => state.user.userData.id);
+function Routers (props) {
+  
+  const { cookies } = props;
+  const [ cookie , setCookie ] = useState('');
+  
+  useEffect(() => {
+    setCookie(cookies.get('access_token') || false);
+  }, [cookie])
+  
+  console.log(cookie);
+  console.log(cookies.get('access_token'))
+  const isLogged = cookie
+
+  // const isLogged = useSelector(state => state.user.userData.isAuth);
   return (
     <Router>
         <>
-          {isLogged ? <LoggedHeader match={userId}/> : <Header />}
+          {isLogged ? <LoggedHeader /> : <Header />}
           <Switch>
             <Route exact path="/" component={Auth(LandingPage, null)} />
             <Route exact path="/login" component={Auth(LoginPage, false)} />
@@ -38,3 +49,4 @@ export default () => {
   );
 };
 
+export default withCookies(Routers);

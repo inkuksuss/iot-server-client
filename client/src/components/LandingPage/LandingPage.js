@@ -3,14 +3,14 @@ import { useDispatch } from "react-redux";
 import { withRouter } from 'react-router-dom'; 
 import { logout } from '_actions/user_action';
 
-function LandingPage(props) {
+function LandingPage() {
     const dispatch = useDispatch();
     const onClickHandler = (event) => {
         event.preventDefault();
         dispatch(logout())
             .then(response => {
                 if (response.payload.success) {
-                    props.history.push("/login");
+                    window.location.replace("/login");
                 } else {
                     alert('로그아웃 실패');
                 }

@@ -12,7 +12,8 @@ export default function(SpecificComponent, option, adminRoute = null) {
 
         useEffect(() => {
             dispatch(auth()).then(response => {
-                if (!response.payload.isAuth) {
+                console.log(response.payload)
+                if (!response.payload) {
                     if (option) {
                         props.history.push('/login') // 로그인 안한 유저 차단
                     } 

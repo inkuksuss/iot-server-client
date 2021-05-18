@@ -20,7 +20,7 @@ const jwtMiddleware = async (req, res, next) => {
     } 
     return;
   } catch(err) {
-    throw Error();
+    console.log(err)
   }
 };
 
