@@ -1,5 +1,7 @@
 import User from "../models/User";
 import Product from "../models/Product"
+import Dht from '../models/Dht';
+import Pms from "../models/Pms";
 
 // Users
 export const getMe =  async (req, res) => {
@@ -112,6 +114,14 @@ export const postDeleteKey = async(req, res) => {
         if(String(product.user) === String(userId)) {
             await Product.findByIdAndDelete(id);
             await User.findByIdAndUpdate(userId, {$pull: { keyList: id }});
+            const dhts = await Dht.find({product: id});
+            const pmss = await Pms.find({product: id});
+            for(const dht of dhts) {
+                await Dht.findByIdAndDelete(dht._id)
+            };
+            for(const pms of pmss) {
+                await Pms.findByIdAndDelete(pms._id);
+            };
             res.json({
                 success: true,
                 message: "삭제 성공"

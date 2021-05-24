@@ -12,15 +12,16 @@ export default function(SpecificComponent, option, adminRoute = null) {
 
         useEffect(() => {
             dispatch(auth()).then(response => {
-                console.log(response.payload)
-                if (!response.payload) {
-                    if (option) {
-                        props.history.push('/login') // 로그인 안한 유저 차단
-                    } 
-                } else {
-                    if(!option) {
-                        props.history.push('/') // 로그인 한 유저 차단
-                    } 
+                if(response.payload){
+                    if (!response.payload.isAuth) {
+                        if (option) {
+                            props.history.push('/login') // 로그인 안한 유저 차단
+                        } 
+                    } else {
+                        if(!option) {
+                            props.history.push('/') // 로그인 한 유저 차단
+                        } 
+                    }
                 }
             })
         }, [])

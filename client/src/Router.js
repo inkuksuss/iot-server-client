@@ -12,8 +12,8 @@ import JoinPage from 'components/JoinPage/JoinPage';
 import PythonPage from 'components/PythonPage/PythonPage';
 import Auth from './hoc/auth'
 import Header from 'components/Header/Header';
-import LoggedHeader from "components/Header/LoggedHeader"
-import { useSelector } from 'react-redux';
+import LoggedHeader from "components/Header/LoggedHeader";
+import ProductPage from "components/Product/ProduectPage";
 import MyPage from 'components/MyPage/MyPage';
 import DevicePage from 'components/Device/DevicePage';
 
@@ -27,11 +27,8 @@ function Routers (props) {
     setCookie(cookies.get('access_token') || false);
   }, [cookie])
   
-  console.log(cookie);
-  console.log(cookies.get('access_token'))
   const isLogged = cookie
 
-  // const isLogged = useSelector(state => state.user.userData.isAuth);
   return (
     <Router>
         <>
@@ -42,7 +39,7 @@ function Routers (props) {
             <Route exact path="/join" component={Auth(JoinPage, false)} />
             <Route exact path="/me" component={Auth(MyPage, true)} />
             <Route exact path='/data/:id' component={Auth(DevicePage, true)} />
-            {/* <Route exact path="/python" component={PythonPage} /> */}
+            <Route exact path='/data/product/:id' component={Auth(ProductPage, true)} />
           </Switch>
         </>
       </Router>

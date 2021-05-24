@@ -2,8 +2,6 @@ import routes from "../routes";
 import Dht from "../models/Dht";
 import User from "../models/User"
 import { PythonShell } from "python-shell";
-import cookieParser from 'cookie-parser';
-import { json } from 'body-parser';
 
 const scriptPath = '/Users/gim-ingug/Documents/iotserver/pythonCgi'
 
@@ -12,7 +10,9 @@ export const dataUser = async(req, res) => {
         params: { id }
     } = req;
     try {
-        PythonShell.run('DataUser.py', {
+        PythonShell.run('mean.py', {
+            mode: 'json',
+            pythonOptions: ['-u'],
             scriptPath,
             args: id
         }, (err, data) => {
@@ -22,10 +22,9 @@ export const dataUser = async(req, res) => {
                     error: err
                 })
             }
-            const parseData = JSON.parse(data)
             res.json({
                 success: true,
-                data: parseData
+                data
             })
         })
     } catch(err) {

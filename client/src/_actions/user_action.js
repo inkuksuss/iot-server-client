@@ -88,7 +88,6 @@ export function deleteKey(id) {
 };
 
 export function userDevice(id) {
-    console.log(id);
     const request = api.get(`/data/${id}`)
         .then(response => response.data)
     return {
