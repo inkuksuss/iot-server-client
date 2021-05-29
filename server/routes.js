@@ -17,6 +17,7 @@ const DELETE_KEY = "/deleteKey";
 // data
 const DATAS = "/data";
 const DATA_USER = "/:id";
+const DETAIL_DATA = "/product/:id"
 
 // API
 const API = "/api";
@@ -47,6 +48,13 @@ const routes = {
         } else {
           return DATA_USER;
         }
+    },
+    detailData: id => {
+      if (id) {
+        return `data/product/${id}`;
+      } else {
+        return DETAIL_DATA;
+      }
     },
     // API
     api: API,

@@ -22,14 +22,12 @@ app.use(cors({
     origin: cors_origin,
     credentials: true
 })) // cors설정
-app.use("/uploads", express.static('uploads')); // /uploads로 접근하면 uploads파일로 싸줌
-app.use("/image", express.static('image'));
 app.use(bodyPareser.json()); //JSON 가져옴
 app.use(bodyPareser.urlencoded({ extended: true })); // FORM형식 가져옴
 app.use(morgan("dev")); // 접속 추적
 
 //Router
-app.use(routes.api, apiRouter);
+app.use(routes.api, apiRouter); 
 app.use(routes.home, globalRouter);
 app.use(routes.users, userRouter);
 app.use(routes.data, dataRouter);

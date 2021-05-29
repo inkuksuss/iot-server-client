@@ -28,7 +28,7 @@ client.on("connect", () => { // mqtt 연결하기
 });
 
 client.on("message", async (topic, message) => { // 구독한 토픽으로부터 데이터 받아오기
-    const topicContainer = topic.split('/'); // 토픽 슬라이싱
+    const topicContainer = topic.split('/'); // 토픽 슬라이
     const obj = JSON.parse(message); // 페이로드 파싱
     if(obj.key && typeof(obj.key) === "string") { // 해당 토픽 및 페이로드 유효성 검사
         if(topicContainer[6] === 'input' && topicContainer[7] === 'pms' && obj.dust && typeof(obj.dust) === 'number') {
@@ -145,22 +145,20 @@ io.on("connection", socket => { // 소켓 연결
                     }
                         socket.emit("mqttSubmit", JSON.stringify(dataForm)) // 소켓을 이용해 데이터 프론트로 전송
                 } catch(err) {
-                    throw Error();
+                    console.log(err);
                 }
             }
         })
 
         socket.on("productId", async(id) => {
             const productId = id.id;
-            console.log(id.id);
-            let dataForm = [];
+            let data = {};
             if(productId) {
                 try {
                     const dht = await Dht.find({ product: productId }).sort({ _id: -1 }).limit(1)
                     const pms = await Pms.find({ product: productId }).sort({ _id: -1 }).limit(1)
-                    console.log(dht)
                     if(dht && pms) {
-                        const data = { // 새로운 객체 생성 
+                        data = { // 새로운 객체 생성 
                             tmp: dht[0].tmp,
                             hum: dht[0].hum,
                             dust: pms[0].dust,
@@ -168,9 +166,8 @@ io.on("connection", socket => { // 소켓 연결
                             product: dht[0].product,
                             keyName: dht[0].key
                         }
-                        dataForm.push(data)
                     }
-                    socket.emit("mqttData", JSON.stringify(dataForm)) // 소켓을 이용해 데이터 프론트로 전송
+                    socket.emit("mqttData", JSON.stringify(data)) // 소켓을 이용해 데이터 프론트로 전송
                 } catch (err) {
                     // throw Error();
                     console.log(err);

@@ -7,15 +7,17 @@ import {
     ADD_KEY,
     LOGOUT,
     DELETE_KEY,
-    USER_DEVICE
+    USER_DEVICE,
+    DEVICE_DETAIL,
+    DATA_DATE
 } from './types';
 
-const api = axios.create({
+const api = axios.create({ // axios 설정
     baseURL: 'http://localhost:3001',
     withCredentials: true
 });
 
-export function loginUser(dataToSubmit) {
+export function loginUser(dataToSubmit) { // 로그인 페이지 패치
 
     const request = api.post('/login', dataToSubmit)
         .then(response => response.data)
@@ -26,7 +28,7 @@ export function loginUser(dataToSubmit) {
     }
 };
 
-export function joinUser(dataToSubmit) {
+export function joinUser(dataToSubmit) { // 회원가입 페이지 패치
 
     const request = api.post('/join', dataToSubmit)
         .then(response => response.data)
@@ -92,6 +94,24 @@ export function userDevice(id) {
         .then(response => response.data)
     return {
         type: USER_DEVICE,
+        payload: request
+    }
+};
+
+export function deviceDetail(id) {
+    const request = api.get(`/data/product/${id}`)
+        .then(response => response.data)
+    return {
+        type: DEVICE_DETAIL,
+        payload: request
+    }
+};
+
+export function dataDate(id, body) {
+    const request = api.post(`data/product/${id}`, body)
+        .then(response => response.data)
+    return {
+        type: DATA_DATE,
         payload: request
     }
 };

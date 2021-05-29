@@ -8,7 +8,9 @@ import {
     ADD_KEY,
     LOGOUT,
     DELETE_KEY,
-    USER_DEVICE
+    USER_DEVICE,
+    DEVICE_DETAIL,
+    DATA_DATE
 } from '../_actions/types';
 
 export default function (state = {}, action) {
@@ -28,6 +30,10 @@ export default function (state = {}, action) {
         case DELETE_KEY:
             return {...state, success: action.payload};
         case USER_DEVICE:
+            return {...state, data: action.payload};
+        case DEVICE_DETAIL:
+            return {...state, data: action.payload};
+        case DATA_DATE:
             return {...state, data: action.payload};
         default:
             return state;

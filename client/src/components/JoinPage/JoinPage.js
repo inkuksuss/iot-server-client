@@ -2,6 +2,17 @@ import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { joinUser } from '../../_actions/user_action';
 import { withRouter } from 'react-router-dom';
+import styled from "styled-components";
+import Swing from "react-reveal/Swing";
+
+const Container = styled.div`
+    background: linear-gradient(to right, #ffe259 0%, #ffa751 100%);
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`;
 
 function JoinPage(props) {
     const dispatch = useDispatch();
@@ -11,7 +22,6 @@ function JoinPage(props) {
     const [Password, setPassword] = useState("");
     const [ConfirmPassword, setConfirmPassword] = useState("");
     const [Key, setKey] = useState("");
-
 
     const onEmailHandler = (event) => {
         setEmail(event.currentTarget.value);
@@ -33,13 +43,13 @@ function JoinPage(props) {
         setKey(event.currentTarget.value);
     };
 
-    const onSubmitHandler = (event) => {
-        event.preventDefault();
-        if (Password !== ConfirmPassword) {
+    const onSubmitHandler = (event) => { // 회원가입 페이지 폼 관리
+        event.preventDefault(); // 이벤트 발생 막음 => 페이지 리로딩 x
+        if (Password !== ConfirmPassword) { // 오류 발생시 1차적으로 클라이언트에서 막음
             return alert('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
         }
 
-        const body = {
+        const body = { // 데이터 객체화
             email: Email,
             password: Password,
             confirmPassword: ConfirmPassword,
@@ -47,9 +57,9 @@ function JoinPage(props) {
             key: Key
         } ;
 
-        dispatch(joinUser(body))
+        dispatch(joinUser(body)) // 서버로 전송
             .then(response => {
-                if (response.payload.success) {
+                if (response.payload.success) { // 결과에 따라 페이지 이동
                     alert(response.payload.message);
                     props.history.push("/login");
                 } else {
@@ -59,10 +69,8 @@ function JoinPage(props) {
     };
 
     return (
-        <div style={{
-            display: 'flex', justifyContent: 'center', alignItems: 'center'
-            , width: '100%', height: '100vh'
-        }}>
+        <Container>
+            <Swing delay={1000}>
             <form style={{ display: 'flex', flexDirection: 'column' }}
                 onSubmit={onSubmitHandler}
             >
@@ -86,7 +94,8 @@ function JoinPage(props) {
                     회원 가입
                 </button>
             </form>
-        </div>
+            </Swing>
+        </Container>
     )
 };
 

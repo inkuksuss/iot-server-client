@@ -1,16 +1,20 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from 'react-redux'
-import { userDevice } from '_actions/user_action';
+import { auth, userDevice } from '_actions/user_action';
 import socektIO from "socket.io-client";
 import DeviceDetail from "./DeviceDetail";
 import DevicePython from "./DevicePython";
 import Loader from '../Loader';
 import styled from "styled-components";
 
-//[전체{ 1번 {온도 습도 미세먼지}2번 3번}, 일주일, 한달]
-
 const initialValue = []
 let dataContainer = [];
+
+const Container = styled.div`
+    background: linear-gradient(to right, #ffe259 0%, #ffa751 100%);
+    width: 100%;
+    height: 100vh;
+`;
 
 const Box = styled.div`
   display: flex;
@@ -19,7 +23,7 @@ const Box = styled.div`
   height: 100vh;
 `;
 
-const Container = styled.div`
+const Slider = styled.div`
   width: 60%;
   overflow: hidden; // 선을 넘어간 이미지들은 보이지 않도록 처리합니다.
 `;
@@ -46,10 +50,10 @@ const SliderContainer = styled.div`
 
 let total_slides = 0;
 
-const socket = socektIO('http://localhost:3001');
+const socket = socektIO('http://localhost:3001'); // 소켓 연결
 
 function DevicePage(props) {
-    const userId = useSelector(state => state.user.userData.id);
+    const userId = useSelector(state => state.user.userData.id); 
     const dispatch = useDispatch();
 
     const [response, setResponse] = useState([]);
@@ -58,10 +62,37 @@ function DevicePage(props) {
     const [ socketLoading, setSocektLoading ] = useState(true);
     const [ pythonLoading, setPythonLoading ] = useState(true);
     const [ currentSlide, setCurrentSlide ] = useState(0);
-    const slideRef = useRef(null);
+    const slideRef = useRef(null); // 가상Dom이 아닌 실제 Dom에 접근
     const slideRefPy = useRef(null);
+    const [user, setUser] = useState({
+        name: null,
+        email: null,
+        keyList: [],
+        isAuth: false,
+        id: null
+    });
+    const [loading, setLoading] = useState(true);
 
-    const nextSlide = () => {
+    useEffect(() => {
+        dispatch(auth()).then(response => {
+            const userData = response.payload
+            console.log(response.payload)
+            if(response.payload){
+                if (!response.payload.isAuth) {
+                        props.history.push('/login') // 로그인 안한 유저 차단
+                } else {
+                    setUser({...user, ...userData})
+                }
+            }
+        })
+    }, [])
+
+    useEffect(() => {
+        setLoading(false);
+    }, [user])
+
+
+    const nextSlide = () => { // 슬라이드  다음 버튼 이벤트 관리
         if(currentSlide >= total_slides - 1) {
             setCurrentSlide(0);
         } else {
@@ -69,7 +100,7 @@ function DevicePage(props) {
         }
     };
 
-    const prevSlide = () => {
+    const prevSlide = () => { // 슬라이드 이전 버튼 이벤트 관리
         if(currentSlide === 0) {
             setCurrentSlide(total_slides - 1);
         } else {
@@ -78,16 +109,16 @@ function DevicePage(props) {
     };
 
     const jsonHandler = async (res) => {
-        try{
+        try {
             const parser = await JSON.parse(res);
             total_slides = parser.length
             if(response.length === 0) {
                 setResponse(
-                    response.concat(parser).filter((_, index) => index >= 0)
+                    response.concat(parser)
                     )
-            } else {
+                } else {
                     setResponse(
-                        response.concat(parser)
+                        response.filter((_, index) => index >= 0).concat(parser)
                     )
             }  
         } catch (err) {
@@ -109,10 +140,6 @@ function DevicePage(props) {
                     }
                 }
                 setWeek(prev => prev.filter((_, index) => index > 0).concat(dataContainer));
-                // for(const i of week) {
-                //     console.log(i)
-                // }
-                // console.log(week[0])
                 setPythonLoading(false)
             })
         return () => {
@@ -120,7 +147,7 @@ function DevicePage(props) {
         }           
     }, [pythonLoading])
 
-    useEffect(() => {
+    useEffect(() => { // 서버와 5초 간격으로 소켓 통신
         const timer = setTimeout(() => {
             socket.emit("sendId", { userId });
             setTime(true);
@@ -151,19 +178,19 @@ function DevicePage(props) {
     }, [currentSlide])
 
     return (
-        socketLoading || pythonLoading ? (
+        loading || socketLoading || pythonLoading ? (
             <Loader />
         )
         : (
-        <>
+        <Container>
             <Box>
-                <Container>
-                    <SliderContainer ref={slideRef}>{response !== [] ? response.map((res) => (
+                <Slider>
+                    <SliderContainer ref={slideRef}>{response.length && response.map((res) => (
                         (<DeviceDetail {...res} key={res.product} />)))
-                    : null}
+                    }
                     </SliderContainer>
                     <SliderContainer ref={slideRefPy}>
-                        {week[0].map((data,index) => (
+                        {week[0].length && week[0].map((data,index) => (
                             <DevicePython {...data} key={index} />
                         ))}
                     </SliderContainer>
@@ -171,9 +198,9 @@ function DevicePage(props) {
                         <Button type="button" onClick={prevSlide}>Prev</Button>
                         <Button type="button" onClick={nextSlide}>Next</Button>
                     </div>
-                </Container>
+                </Slider>
             </Box>
-        </>
+        </Container>
         ) 
     )
 };

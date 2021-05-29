@@ -1,14 +1,52 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux';
-import { loginUser } from '../../_actions/user_action';
+import { auth, loginUser } from '../../_actions/user_action';
 import { withRouter } from 'react-router-dom';
+import Bounce from "react-reveal/Bounce";
+import styled from "styled-components";
 
-function LoginPage() {
-    const dispatch = useDispatch();
-    const [Email, setEmail] = useState("")
+const Container = styled.div`
+    background: linear-gradient(to right, #ffc3a0 0%, #FFAFBD 100%);
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+`;
+
+function LoginPage(props) {
+    const dispatch = useDispatch(); // 리덕스 dispatch 
+    const [Email, setEmail] = useState("") // 이메일과 패스워드를 스테이트로 관리
     const [Password, setPassword] = useState("")
+    const [user, setUser] = useState({
+        name: null,
+        email: null,
+        keyList: [],
+        isAuth: false,
+        id: null
+    });
+    const [loading, setLoading] = useState(true);
 
-    const onEmailHandler = (event) => {
+    useEffect(() => {
+        dispatch(auth()).then(response => {
+            const userData = response.payload
+            if(userData){
+                if (userData.isAuth) {
+                        props.history.push('/') // 로그인한 유저 차단
+                } else {
+                    setUser({...user, ...userData})
+                }
+            }
+        })
+    }, [])
+
+    useEffect(() => {
+        setLoading(false);
+    }, [user])
+
+    const onEmailHandler = (event) => { // 이벤트 관리
         setEmail(event.currentTarget.value)
     }
 
@@ -16,7 +54,7 @@ function LoginPage() {
         setPassword(event.currentTarget.value)
     }
 
-    const onSubmitHandler = (event) => {
+    const onSubmitHandler = (event) => { // 폼을 사용하여 서버로 데이터 전송
         event.preventDefault();
 
         const body = {
@@ -35,10 +73,9 @@ function LoginPage() {
     }
 
     return (
-        <div style={{
-            display: 'flex', justifyContent: 'center', alignItems: 'center'
-            , width: '100%', height: '100vh'
-        }}>
+        
+        <Container>
+            <Bounce top delay={1000}>
             <form style={{ display: 'flex', flexDirection: 'column' }}
                 onSubmit={onSubmitHandler}
             >
@@ -51,7 +88,8 @@ function LoginPage() {
                     Login
                 </button>
             </form>
-        </div>
+            </Bounce>
+        </Container>
     )
 }
 

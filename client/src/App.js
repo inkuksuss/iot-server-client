@@ -2,10 +2,10 @@ import React from 'react';
 import GlobalStyles from 'GlobalStyles';
 import Routers from "Router";
 
-function App() {
+function App(props) {
   return (
     <>
-      <Routers />
+      <Routers/>
       <GlobalStyles />  
     </>
   )

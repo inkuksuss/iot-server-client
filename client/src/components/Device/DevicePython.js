@@ -6,6 +6,7 @@ const Container = styled.div`
   flex-grow: 0;
   flex-shrink: 0;
   height: 10vh;
+  color: black;
 `;
 
 function DevicePython(props) {

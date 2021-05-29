@@ -3,20 +3,20 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const UserSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    hashedPassword: String,
-    token: {
+    name: String, // 이름
+    email: String, // 이메일
+    hashedPassword: String, // 암호화된 패스워드
+    token: { // 유저 토큰
         type: String,
         default: ""
-    },
-    keyList: [
+    }, 
+    keyList: [ // 유저 제품 리스트
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product'
         }
     ],
-    datas: [
+    datas: [ // 유저 제품 데이터
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Data'

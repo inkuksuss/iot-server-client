@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 const PmsSchema = new mongoose.Schema({
-    dust: Number,
-    measuredAt: {
+    dust: Number, // 미세먼지
+    measuredAt: { // 측정시간
         type: Date,
         default: Date.now
     },

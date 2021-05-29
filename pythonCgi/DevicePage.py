@@ -22,6 +22,7 @@ current_date = datetime.now()
 user_id = sys.argv[1]
 bson_id = ObjectId(user_id)
 # ObjectId("60a0f9a37c65f50eedcec527")
+#
 
 # 데이터 처리
 user_datas = user.find_one({"_id": bson_id})
@@ -73,6 +74,7 @@ for tmp, hum in zip(tmp_week_container, hum_week_container):
     data.append(dust_week_container[i])
     data_container.append(data)
     i = i + 1
+
 
 json_data = dumps(data_container)
 print(json_data)

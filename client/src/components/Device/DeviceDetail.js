@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { FaRegSmileBeam } from 'react-icons/fa';
 import { CgSmileSad, CgSmileNeutral } from 'react-icons/cg';
@@ -13,7 +13,7 @@ const Container = styled.div`
 
 
 
-function DeviceDetail({ tmp, hum, dust, measuredAt, product, keyName}) {
+function DeviceDetail({ tmp, hum, dust, measuredAt, product, keyName }) {
     const time = measuredAt.split('T')[1]
     const realTime = time.split('.000Z')[0]    
     return (

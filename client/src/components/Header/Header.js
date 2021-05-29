@@ -2,52 +2,76 @@ import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import styled from "styled-components";
 
-const Header = styled.header`
-    color: white;
+const NAV = styled.nav`
     position: fixed;
+    right: 0;
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    background-color: rgba(20, 20, 20, 0.8);
+    width: 180px;
     z-index: 10;
-    box-shadow: 0px 1px 5px 2px rgba(0, 0, 0, 0.8);
 `;
 
-const List = styled.ul`
-    display:flex;
-`;
-
-const Item = styled.li`
-    width: 80px;
-    height: 50px;
-    text-align: center;
-    border-bottom: 5px solid 
-        ${props => (props.current ? "#3498db" : "transparent")};
-        transition: border-bottom 0.5s ease-in-out;
+const ITEMLIST = styled.ul`
+    display: grid;
+    grid-template-columns: repeat(3, 60px);
+    grid-template-rows: 100vh;
 `;
 
 const SLink = styled(Link)`
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transform: rotateZ(90deg);
 `;
 
-export default withRouter(({ location: { pathname }}) => (
-    <Header>
-        <List>
-            <Item current={pathname === "/"}>
-                <SLink to="/">홈</SLink>
-            </Item>    
-            <Item current={pathname === "/login"}>
-                <SLink to="/login">로그인</SLink>
-            </Item>
-            <Item current={pathname === "/join"}>
-                <SLink to="/join">회원가입</SLink>
-            </Item>
-        </List>
-    </Header>
-));
+const Item = styled.li`
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+`;
+
+export default withRouter(({ location: { pathname } }) => {
+    const url = window.location.href;
+    const path = url.split('/localhost:3000')[1]
+    return(
+        <NAV>
+            {path === '/' ? (
+                <ITEMLIST>
+                <Item current={pathname==='/'} style={{backgroundColor:"#C9D6FF"}}> 
+                    <SLink to="/">Home</SLink>
+                </Item>    
+                <Item current={pathname==='/login'} style={{backgroundColor:"#FFAFBD"}}> 
+                    <SLink to="/login">Login</SLink>
+                </Item>
+                <Item current={pathname==="/join"} style={{backgroundColor:"#ffa751"}}> 
+                    <SLink to={"/join"}>Join</SLink>
+                </Item>
+                </ITEMLIST>
+            ) : (
+                path === '/login' ? (
+                    <ITEMLIST>
+                        <Item current={pathname==='/login'} style={{backgroundColor:"#FFAFBD"}}> 
+                            <SLink to="/login">Login</SLink>
+                        </Item>
+                        <Item current={pathname==='/'} style={{backgroundColor:"#C9D6FF"}}> 
+                            <SLink to="/">Home</SLink>
+                        </Item>    
+                        <Item current={pathname==="/join"} style={{backgroundColor:"#ffa751"}}> 
+                            <SLink to={"/join"}>Join</SLink>
+                        </Item>
+                    </ITEMLIST>
+                ) : (
+                    <ITEMLIST>
+                        <Item current={pathname==="/join"} style={{backgroundColor:"#ffa751"}}> 
+                            <SLink to={"/join"}>Join</SLink>
+                        </Item>
+                        <Item current={pathname==='/login'} style={{backgroundColor:"#FFAFBD"}}> 
+                            <SLink to="/login">Login</SLink>
+                        </Item>
+                        <Item current={pathname==='/'} style={{backgroundColor:"#C9D6FF"}}> 
+                            <SLink to="/">Home</SLink>
+                        </Item>    
+                    </ITEMLIST>
+                )
+            )}
+        </NAV>
+    )
+});

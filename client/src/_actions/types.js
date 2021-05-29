@@ -6,3 +6,5 @@ export const CHANGE_PASSWORD = "change_password";
 export const ADD_KEY = "add_key";
 export const DELETE_KEY = "delete_key";
 export const USER_DEVICE = "user_device"
+export const DEVICE_DETAIL = "device_detail"
+export const DATA_DATE = "data_date"
