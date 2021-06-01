@@ -7,6 +7,10 @@ import Loader from "../Loader";
 import DatePick from "./DatePicker";
 import ProductDetail from './ProductDetail';
 import Fade from "react-reveal/Fade";
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import IOSSwitch from "./IOSSwitch";
+import { Bar } from "react-chartjs-2";
 
 
 const socket = socektIO('http://localhost:3001');
@@ -141,6 +145,10 @@ const FormBtn = styled.button`
     }
 `;
 
+const Checkbox = styled.input`
+    
+`;
+
 
 const DataBox = styled.table`
     width: 80%;
@@ -185,6 +193,21 @@ function ProductPage(props) {
     const [jsLoading, setJsLoading] = useState(true);
     const [socketData, setSocketData] = useState(initialValue);
     const [jsData, setJsData] = useState(initialJsValue);
+    const [jsAvg, setJsAvg] = useState({
+        tmpAvg: [],
+        humAvg: [],
+        dustAvg: []
+    });
+    const [jsMin, setJsMin] = useState({
+        tmpMin: [],
+        humMin: [],
+        dustMin: []
+    });
+    const [jsMax, setJsMax] = useState({
+        tmpMax: [],
+        humMax: [],
+        dustMax: []
+    });
     const [date, setDate] = useState(
         new Date(
             new Date().getFullYear(),
@@ -193,10 +216,88 @@ function ProductPage(props) {
         )
     );
     const [endDate, setEndDate] = useState(new Date());
-    // const [dateClick, setDateClick] = useState(false);
-    // const [dataLoad, setDataLoad] = useState(false);
     const [btnResult, setBtnResult] = useState(0);
+    const [checked, setChecked] = useState(false);
+    const [ledStatus, setLedStatus] = useState({
+        auto: false,
+        Red: false,
+        Yellow: false,
+        Green: false
+    });
 
+    const avgChart = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sem', 'Oct', 'Nov', 'Dec'],
+        datasets: [
+            {
+                type: 'bar',
+                label: '전체 평균 온도',
+                data: [...jsAvg.tmpAvg],
+                backgroundColor: 'rgb(255, 99, 132)'
+            },
+            {
+                type: 'bar',
+                label: '전체 평균 습도',
+                data: [...jsAvg.humAvg],
+                backgroundColor: 'rgb(54, 162, 235)'
+            },
+            {
+                type: 'bar',
+                label: '전체 평균 먼지',
+                data: [...jsAvg.dustAvg],
+                backgroundColor: 'rgb(75, 192, 192)'
+            },
+            {
+                type: 'line',
+                label: '전체 최대 온도',
+                data: [...jsMax.tmpMax],
+                backgroundColor: 'red'
+            },
+            {
+                type: 'line',
+                label: '전체 최대 습도',
+                data: [...jsMax.humMax],
+                backgroundColor: 'black'
+            },
+            {
+                type: 'line',
+                label: '전체 최대 먼지',
+                data: [...jsMax.dustMax],
+                backgroundColor: 'purple'
+            },
+            {
+                type: 'line',
+                label: '전체 최소 온도',
+                data: [...jsMin.tmpMin],
+                backgroundColor: 'orange'
+            },
+            {
+                type: 'line',
+                label: '전체 최소 습도',
+                data: [...jsMin.humMin],
+                backgroundColor: 'yellow'
+            },
+            {
+                type: 'line',
+                label: '전체 최소 먼지',
+                data: [...jsMin.dustMin],
+                backgroundColor: 'green'
+            },
+        ]
+    }
+
+    const options = {
+        scales: {
+          yAxes: [
+            {
+              ticks: {
+                beginAtZero: true,
+              },
+            },
+          ],
+        },
+      };
+
+      console.log(jsAvg.dustAvg);
 
     const dispatch = useDispatch();
     const url = window.location.href
@@ -210,6 +311,15 @@ function ProductPage(props) {
         id: null
     });
     const [loading, setLoading] = useState(true);
+    const [checkedBox, setCheckedBox] = useState({
+        Red: false,
+        Yellow: false,
+        Green: false
+    });
+
+    const handleLedChange = (event) => {
+        setCheckedBox({...checkedBox, [event.target.name]: event.target.checked})
+    }
 
     useEffect(() => {
         dispatch(auth()).then(response => {
@@ -313,6 +423,7 @@ function ProductPage(props) {
 
     useEffect(() => {
         socket.on("mqttData", jsonHandler);
+        socket.on("publishData", )
         return () => {
         socket.off("mqttData", jsonHandler);
         setSocektLoading(true);
@@ -325,14 +436,37 @@ function ProductPage(props) {
             .then(response => {
                 const success = response.payload.success;
                 if(success) {
-                    const res = response.payload.data;
-                    // setDataLoad(true)
-                    if(res.length !== 0) {
+                    const data = response.payload.data;
+                    const avgTmpForm = response.payload.avgTmpForm
+                    const avgHumForm = response.payload.avgHumForm
+                    const avgDustForm = response.payload.avgDustForm
+                    const minTmpForm = response.payload.minTmpForm
+                    const minHumForm = response.payload.minHumForm
+                    const minDustForm = response.payload.minDustForm
+                    const maxTmpForm = response.payload.maxTmpForm
+                    const maxHumForm = response.payload.maxHumForm
+                    const maxDustForm = response.payload.maxDustForm
+                    if(data.length !== 0) {
                             setJsData(
                                 jsData.filter((_, index) => index < 0)
                             );
                     }
-                    setJsData(jsData.concat(res));
+                    setJsData(jsData.concat(data));
+                    setJsAvg({
+                        tmpAvg: [...avgTmpForm],
+                        humAvg: [...avgHumForm],
+                        dustAvg: [...avgDustForm]
+                    });
+                    setJsMax({
+                        tmpMax: [...maxTmpForm],
+                        humMax: [...maxHumForm],
+                        dustMax: [...maxDustForm]
+                    })
+                    setJsMin({
+                        tmpMin: [...minTmpForm],
+                        humMin: [...minHumForm],
+                        dustMin: [...minDustForm]
+                    })
                     if(jsLoading === true) {
                         setJsLoading(false);
                     }       
@@ -341,9 +475,41 @@ function ProductPage(props) {
                 }
             })
         return () => {
-            setJsData(jsData.filter((_, idx) => idx >= 0))
+            setJsData(jsData.filter((_, idx) => idx < 0))
         }
     }, [])   
+
+    const publish = (event) => {
+        const {
+             target: { value, name }
+        } = event;
+        const data = checkedBox;
+        const userId = window.localStorage.getItem('id');
+        data['auto'] = checked;
+        data['key'] = value;
+        data['product'] = name;
+        data['controller'] = userId
+        if(data['auto'] === true) {
+            checkedBox['Green'] = false;
+            checkedBox['Red'] = false;
+            checkedBox['Yellow'] = false;
+        }
+        socket.emit("publishLED", data)
+        socket.on('LEDResult', result => {
+            if(result.success) {
+                setLedStatus({
+                    ...ledStatus, 
+                    ...result
+                })
+            }
+        });
+    };
+
+
+    const handleCheck = () => {
+        setChecked(!checked);
+    };
+
 
     return (
         loading || socketLoading || jsLoading ? (
@@ -361,7 +527,32 @@ function ProductPage(props) {
                         <RealTime>{socketData.measuredAt ? (
                         socketData.measuredAt.split('T')[1].split('.000Z')[0]    
                         ) : null}
-                        </RealTime>
+                        </RealTime>      
+                        <div>                 
+                            <FormGroup>
+                                <FormControlLabel
+                                control={<IOSSwitch checked={checked} onChange={handleCheck} name="checked" />}
+                                label="AUTO"
+                                />
+                            <div>{checked ? null : (
+                                <FormGroup>
+                                    <FormControlLabel
+                                    control={<IOSSwitch checked={checkedBox.Red} onChange={handleLedChange} name="Red" />}
+                                    label="Red"
+                                    />
+                                    <FormControlLabel
+                                    control={<IOSSwitch checked={checkedBox.Yellow} onChange={handleLedChange} name="Yellow" />}
+                                    label="Yellow"
+                                    />
+                                    <FormControlLabel
+                                    control={<IOSSwitch checked={checkedBox.Green} onChange={handleLedChange} name="Green" />}
+                                    label="Green"
+                                    />
+                                </FormGroup>
+                            )}</div>
+                            <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publish}>제어</button>
+                            </FormGroup>
+                            </div>
                         </Fade>
                     </RealTimeContainer>
                     <WHITEBACK>
@@ -403,6 +594,7 @@ function ProductPage(props) {
                             <ProductDetail {...res} key={res._id} />))}
                         </DataBody>
                     </DataBox>
+                    <Bar data={avgChart} options={options}/>
                     </Fade>
                     </WHITEBACK>
         </Container>

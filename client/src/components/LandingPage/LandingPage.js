@@ -12,26 +12,11 @@ const Container = styled.div`
     
 
 function LandingPage(props) {
-    const dispatch = useDispatch();
-    const onClickHandler = (event) => {
-        event.preventDefault();
-        dispatch(logout())
-            .then(response => {
-                if (response.payload.success) {
-                    window.location.replace("/login");
-                } else {
-                    alert('로그아웃 실패');
-                }
-            })
-        window.localStorage.setItem('persist:root','');
-    };
+    
 
     return (
         <Container>
             <h2>시작 페이지</h2>
-            <button onClick={onClickHandler}>
-                로그아웃
-            </button>
         </Container>
     )
 };

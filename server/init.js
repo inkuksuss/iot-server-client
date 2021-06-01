@@ -7,6 +7,7 @@ import Dht from "./models/Dht";
 import Pms from "./models/Pms";
 import Product from './models/Product';
 import User from "./models/User";
+import Led from "./models/Led";
 
 
 dotenv.config();
@@ -19,62 +20,53 @@ const handleListing = () =>
 // web server
 const server = app.listen(PORT, handleListing); // 포트지정 및 콜백함수 실행
 
+
 //mqtt server
 const client = mqtt.connect("mqtt://127.0.0.1");
 
 client.on("connect", () => { // mqtt 연결하기
     console.log("😇Mqtt Connect");
     client.subscribe('jb/shilmu/scle/smenco/apsr/+/input/+'); // 읽을 토픽
+    client.subscribe('jb/shilmu/scle/smenco/apsr/+/output/led');
+    client.subscribe('jb/shilmu/scle/smenco/apsr/+/output/led/res');
 });
 
 client.on("message", async (topic, message) => { // 구독한 토픽으로부터 데이터 받아오기
     const topicContainer = topic.split('/'); // 토픽 슬라이
     const obj = JSON.parse(message); // 페이로드 파싱
-    if(obj.key && typeof(obj.key) === "string") { // 해당 토픽 및 페이로드 유효성 검사
-        if(topicContainer[6] === 'input' && topicContainer[7] === 'pms' && obj.dust && typeof(obj.dust) === 'number') {
-            const date = new Date(); // 서버에서 전송받은 시간 
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const today = date.getDate();
-            const hours = date.getHours();
-            const mintues = date.getMinutes();
-            const seconds = date.getSeconds();
-            obj.measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
-            const keyName = String(topicContainer[5])
-            try{
-                const product = await Product.findOne({ keyName: keyName }); // 디비에 해당 제품이 있다면
-                if(product && product.keyName === obj.key){
-                    if(product.user) {
-                        const userId = product.user; 
-                        const pms = await Pms.create({ // 데이터 디비에 새로운 객체 생성 및 저장
-                            dust: obj.dust,
-                            measuredAt: obj.measuredAt,
-                            key: obj.key,
-                            controller: userId,
-                            product: product._id
-                        });
-                        await pms.save();
-                        await Product.findOneAndUpdate({ keyName }, {$addToSet: {data: pms._id}}); // 제품 디비 업데이트
-                        await User.findByIdAndUpdate({ _id: userId }, {$addToSet: { datas: pms._id}}); // 유저 디비 업데이트
-                        console.log(pms);
-                        console.log('Success MQTT');
-                    }
+    const date = new Date(); // 서버에서 전송받은 시간 
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const today = date.getDate();
+    const hours = date.getHours();
+    const mintues = date.getMinutes();
+    const seconds = date.getSeconds();
+    const keyName = String(topicContainer[5])
+    obj.measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
+    if(obj.key && typeof(obj.key) === "string" && topicContainer[7] === "pms" && obj.dust) { // 해당 토픽 및 페이로드 유효성 검사
+        try{
+            const product = await Product.findOne({ keyName: keyName }); // 디비에 해당 제품이 있다면
+            if(product && product.keyName === obj.key){
+                if(product.user) {
+                    const userId = product.user; 
+                    const pms = await Pms.create({ // 데이터 디비에 새로운 객체 생성 및 저장
+                        dust: obj.dust,
+                        measuredAt: obj.measuredAt,
+                        key: obj.key,
+                        controller: userId,
+                        product: product._id
+                    });
+                    await pms.save();
+                    await Product.findOneAndUpdate({ keyName }, {$addToSet: {data: pms._id}}); // 제품 디비 업데이트
+                    await User.findByIdAndUpdate({ _id: userId }, {$addToSet: { datas: pms._id}}); // 유저 디비 업데이트
+                    console.log(pms);
+                    console.log('Success MQTT');
                 }
-            } catch (err) {
-                console.log(err);
             }
-        } 
-
-        else if(topicContainer[6] === 'input' && topicContainer[7] === 'dht' && obj.tmp && obj.hum && typeof(obj.tmp) === "number" && typeof(obj.hum) === "number") {
-            const date = new Date();
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const today = date.getDate();
-            const hours = date.getHours();
-            const mintues = date.getMinutes();
-            const seconds = date.getSeconds();
-            obj.measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
-            const keyName = String(topicContainer[5])
+        } catch (err) {
+            console.log(err);
+        }
+    } else if(obj.key && typeof(obj.key) === "string" && topicContainer[7] === "dht" && obj.tmp && obj.hum) {
             try{
                 const product = await Product.findOne({ keyName: keyName });
                 if(product && product.keyName === obj.key){
@@ -98,13 +90,9 @@ client.on("message", async (topic, message) => { // 구독한 토픽으로부터
             } catch (err) {
                 console.log(err);
             }
-        } else{
-            console.log('fail');   
         }
-    } else {
-        console.log('no key');   
-    }
 });
+
 
 //웹소켓서버
 const io = socketIO(server, {
@@ -174,5 +162,93 @@ io.on("connection", socket => { // 소켓 연결
                 }
             }
         })
+
+        socket.on("publishLED", async(data) => {
+            const { Red, Yellow, Green, auto, key, product, controller } = data
+            const LedTopic = `jb/shilmu/scle/smenco/apsr/${key}/output/led`; // 퍼블리쉬 토픽
+            const date = new Date(); // 서버에서 전송받은 시간 
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = date.getDate();
+            const hours = date.getHours();
+            const mintues = date.getMinutes();
+            const seconds = date.getSeconds();
+            const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
+            try {
+                const user = await User.findById(controller)
+                const products = await User.findOne({ keyList: {$in : [ product ]} });
+                const keyCheck = await Product.findById(product)
+                if(user.id === products.id && keyCheck.keyName === String(key)) {
+                    const verifyData = {
+                        Red,
+                        Yellow,
+                        Green,
+                        auto,
+                        key
+                    }
+                    const LedJson = JSON.stringify(verifyData); // 웹에서 받은 데이터 제이슨화
+                    client.publish(LedTopic, LedJson, (err) => { // 퍼블리쉬
+                        if(err) {
+                            return console.log(err) // 에러발생시
+                        }
+                        client.on('message', async(LedTopicRes, response) => { // 에러없다면 콜백토픽 서브
+                            if(String(LedTopicRes.split('/')[5]) === key) {
+                                if(response) { // 데이터가 있다면
+                                    const result = JSON.parse(response.toString()); // 데이터 파싱
+                                    console.log(result)
+                                    if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                        const led = await Led.create({
+                                            Red: result.Red,
+                                            Green: result.Green,
+                                            Yellow: result.Yellow,
+                                            measuredAt,
+                                            controller,
+                                            product,
+                                            key
+                                        })                    
+                                        led.save();
+                                        socket.emit('LEDResult', result); // 웹으로 실시간 결과 전달
+                                    }
+                                }
+                            }
+                        });
+                    });
+                }
+            } catch(err) {
+                console.log(err);
+            }
+        })
 });
 
+// // 클라이언트
+// const topics  =`jb/shilmu/scle/smenco/apsr/3/output/led`;
+// client.on('message', (topics, data) => { // 제어 결과 서브
+//     const parsedData = JSON.parse(data.toString()); // 데이터 파싱
+//     if(parsedData) { // 데이터가 있다면
+//         const result = { // 데이터 객체속 성공여부 포함하여 객체 재생   success: true,
+//             ...parsedData
+//         }
+//         const resultJson = JSON.stringify(result) // 객체 제이슨화
+//         client.publish('jb/shilmu/scle/smenco/apsr/3/output/led/res', resultJson) // 서버로 퍼블리쉬
+//     }
+// })
+
+
+// else if(topicContainer[7] === 'led' && topicContainer[8] === 'res') {
+//     if(obj) { // 데이터가 있다면
+//         if(obj.success) { // 데이터 속 결과가 성공이라면
+//             const led = await Led.create({
+//                 auto: obj.auto,
+//                 Red: obj.Red,
+//                 Yellow: obj.Yellow,
+//                 Green: obj.Green,
+//                 measuredAt: obj.measuredAt,
+//                 controller: obj.controller,
+//                 product: obj.product,
+//                 key: obj.key
+//             });
+//             led.save()
+//             socket.emit('LEDResult', obj); // 웹으로 실시간 결과 전달
+//         }
+//     }
+// }

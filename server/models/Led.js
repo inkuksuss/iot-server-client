@@ -1,36 +1,34 @@
 import mongoose from 'mongoose';
 
-const PmsSchema = new mongoose.Schema({
-    dust: {
-        type: Number,
-        default: 0,
-        required: true
-    }, // 미세먼지
+const LedSchema = new mongoose.Schema({
+    auto: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+    Red: Boolean,
+    Yellow: Boolean,
+    Green: Boolean,
     measuredAt: { // 측정시간
         type: Date,
         default: Date.now
     },
-    controller: {
-        required: true,
+    controller: { // 사용 유저
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
         ref: "User"
-        
     },
-    product: {
+    product: { // 제품 번호
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: "Product"
     },
-    sensor: {
-        type: String,
-        default: "PMS"
-    },
     key: {
         required: true,
         type: String
-    }
+    } // 제품 이름
 });
 
-const model = mongoose.model('Pms', PmsSchema);
+const model = mongoose.model('Led', LedSchema);
 
 export default model;

@@ -3,9 +3,18 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const UserSchema = new mongoose.Schema({
-    name: String, // 이름
-    email: String, // 이메일
-    hashedPassword: String, // 암호화된 패스워드
+    name: {
+        required: true,
+        type: String
+    }, // 이름
+    email: {
+        required: true,
+        type: String
+    }, // 이메일
+    hashedPassword: {
+        required: true,
+        type: String
+    }, // 암호화된 패스워드
     token: { // 유저 토큰
         type: String,
         default: ""

@@ -1,9 +1,26 @@
 import Dht from "../models/Dht";
 import Pms from "../models/Pms";
 import User from "../models/User"
+import Mongoose from "mongoose";
 import { PythonShell } from "python-shell";
 
 const scriptPath = '/Users/gim-ingug/Documents/iotserver/pythonCgi'
+const ObjectId = Mongoose.Types.ObjectId;
+// const avgForm = [
+//     { _id: 1, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 2, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 3, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 4, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 5, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 6, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 7, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 8, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 9, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 10, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 11, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
+//     { _id: 12, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0}
+// ];
+
 
 export const dataUser = async(req, res) => {
     const {
@@ -37,8 +54,60 @@ export const deviceDetail = async (req, res) => {
         params: { id }
     } = req;
     let dataArray = [];
+    let avgTmpForm = [0,0,0,0,0,0,0,0,0,0,0,0];
+    let avgHumForm = [0,0,0,0,0,0,0,0,0,0,0,0];
+    let avgDustForm = [0,0,0,0,0,0,0,0,0,0,0,0];
+
+    let minTmpForm = [0,0,0,0,0,0,0,0,0,0,0,0];
+    let minHumForm = [0,0,0,0,0,0,0,0,0,0,0,0];
+    let minDustForm = [0,0,0,0,0,0,0,0,0,0,0,0];
+    
+    let maxTmpForm = [0,0,0,0,0,0,0,0,0,0,0,0];
+    let maxHumForm = [0,0,0,0,0,0,0,0,0,0,0,0];
+    let maxDustForm = [0,0,0,0,0,0,0,0,0,0,0,0];
+
     try {
         const dhtArray = await Dht.find({ product: id }).select('_id tmp hum measuredAt')
+        const dhtCalculator = await Dht.aggregate([
+            { $match: { product: new ObjectId(id) }},
+            {
+                $group: {
+                    "_id": {"$month": {"$toDate":"$measuredAt"}},
+                    AverageTmpValue: { $avg: "$tmp" },
+                    AverageHumValue: { $avg: "$hum" },
+                    MaxTmpValue: { $max: "$tmp" },
+                    MaxHumValue: { $max: "$hum" },
+                    MinTmpValue: { $min: "$tmp" },
+                    MinHumValue: { $min: "$hum" }
+                }
+            }
+        ])
+        const pmsCalculator = await Pms.aggregate([
+            { $match: { product: new ObjectId(id) }},
+            {
+                $group: {
+                    "_id": {"$month": {"$toDate":"$measuredAt"}},
+                    AverageDustValue: { $avg: "$dust" },
+                    MaxDustValue: { $max: "$dust"},
+                    MinDustValue: { $min: "$dust"}
+                }
+            }
+        ])
+
+        for (const dht of dhtCalculator) {
+            avgTmpForm.splice((dht._id - 1), 1, dht.AverageTmpValue);
+            avgHumForm.splice((dht._id - 1), 1, dht.AverageHumValue);
+            minTmpForm.splice((dht._id - 1), 1, dht.MinTmpValue);
+            minHumForm.splice((dht._id - 1), 1, dht.MinHumValue);
+            maxTmpForm.splice((dht._id - 1), 1, dht.MaxTmpValue);
+            maxHumForm.splice((dht._id - 1), 1, dht.MaxHumValue);
+        }
+        for (const pms of pmsCalculator) {
+            avgDustForm.splice((pms._id - 1), 1, pms.AverageDustValue);
+            minDustForm.splice((pms._id - 1), 1, pms.MinDustValue);
+            maxDustForm.splice((pms._id - 1), 1, pms.MaxDustValue);
+        }
+    
         if(dhtArray) {
             for (const dht of dhtArray) {
                 // const pms = await Pms.findOne({ product: id, measuredAt: dht.measuredAt }).select('-_id dust')
@@ -57,7 +126,16 @@ export const deviceDetail = async (req, res) => {
             if(dataArray.length !== 0) {
                 res.json({
                     success: true,
-                    data: dataArray.reverse()
+                    data: dataArray.reverse(),
+                    avgTmpForm,
+                    avgHumForm,
+                    avgDustForm,
+                    minTmpForm,
+                    minHumForm,
+                    minDustForm,
+                    maxTmpForm,
+                    maxHumForm,
+                    maxDustForm
                 })
             } else {
                 res.json({
@@ -136,12 +214,13 @@ export const postDateData = (req, res) => {
                 error: err
             })
         }
+        console.log(data);
         const dataList = data[0]
-        console.log(dataList)
         for(const data of dataList) {
             data.measuredAt = new Date(data.measuredAt['$date']);
             data._id = data._id['$oid'];
         }
+        console.log(dataList)
         return res.json({
             success: true,
             dataList

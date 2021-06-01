@@ -64,7 +64,11 @@ function LoginPage(props) {
         dispatch(loginUser(body))
             .then(response => {
                 if (response.payload.success) {
+                    window.localStorage.setItem('id', response.payload.userId);
+                    props.history.push('/');
+                    setTimeout(() => {
                         window.location.replace('/')
+                    }, 1000);
             } else {
                 alert(response.payload.message)
             }

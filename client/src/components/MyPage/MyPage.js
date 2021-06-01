@@ -5,7 +5,7 @@ import MyPageButton from './MyPageButton';
 import Loading from "../Loader";
 import styled from "styled-components";
 import Jump from "react-reveal/Jump";
-import Rotate from "react-reveal/Rotate";
+import Zoom from "react-reveal/Zoom";
 
 const Container = styled.div`
     background: linear-gradient(to right, #ffc3a0 0%, #FFAFBD 100%);
@@ -120,7 +120,7 @@ function MyPage(props) {
             {
             loading ? (<Loading />) : (
             <Container>
-                <Rotate up right>
+                <Zoom top delay={1000}>
                 <div style={{display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"space-around", height:"150px"}}>
                     <span>이름:  {user.name}</span>
                     <span>이메일:  {user.email}</span>
@@ -147,7 +147,7 @@ function MyPage(props) {
                         <button type="submit">제품 추가</button>
                     </form>
                 </div>
-                </Rotate>
+                </Zoom>
             </Container>)
         }    
         </>
