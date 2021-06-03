@@ -145,10 +145,6 @@ const FormBtn = styled.button`
     }
 `;
 
-const Checkbox = styled.input`
-    
-`;
-
 
 const DataBox = styled.table`
     width: 80%;
@@ -208,6 +204,33 @@ function ProductPage(props) {
         humMax: [],
         dustMax: []
     });
+
+    const [mean, setMean] = useState({
+        tmp: [],
+        hum: [],
+        dust: []
+    })
+    const [max, setMax] = useState({
+        tmp: [],
+        hum: [],
+        dust: []
+    })
+    const [min, setMin] = useState({
+        tmp: [],
+        hum: [],
+        dust: []
+    })
+    const [dateBox, setDateBox] = useState([]);
+    const [allBox, setAllBox] = useState(false);
+    const [oneBox, setOneBox] = useState(false);
+    const [threeBox, setThreeBox] = useState(false);
+    const [sevenBox, setSevenBox] = useState(false);
+    const [monthBox, setMonthBox] = useState(false);
+
+    const [avgCheck, setAvgCheck] = useState(false);
+    const [minCheck, setMinCheck] = useState(false);
+    const [maxCheck, setMaxCheck] = useState(false);
+    const [chartLoading, setChartLoading] = useState(false);
     const [date, setDate] = useState(
         new Date(
             new Date().getFullYear(),
@@ -246,44 +269,158 @@ function ProductPage(props) {
                 data: [...jsAvg.dustAvg],
                 backgroundColor: 'rgb(75, 192, 192)'
             },
-            {
-                type: 'line',
-                label: '전체 최대 온도',
-                data: [...jsMax.tmpMax],
-                backgroundColor: 'red'
-            },
-            {
-                type: 'line',
-                label: '전체 최대 습도',
-                data: [...jsMax.humMax],
-                backgroundColor: 'black'
-            },
-            {
-                type: 'line',
-                label: '전체 최대 먼지',
-                data: [...jsMax.dustMax],
-                backgroundColor: 'purple'
-            },
-            {
-                type: 'line',
-                label: '전체 최소 온도',
-                data: [...jsMin.tmpMin],
-                backgroundColor: 'orange'
-            },
-            {
-                type: 'line',
-                label: '전체 최소 습도',
-                data: [...jsMin.humMin],
-                backgroundColor: 'yellow'
-            },
-            {
-                type: 'line',
-                label: '전체 최소 먼지',
-                data: [...jsMin.dustMin],
-                backgroundColor: 'green'
-            },
+            // {
+            //     type: 'line',
+            //     label: '전체 최대 온도',
+            //     data: [...jsMax.tmpMax],
+            //     backgroundColor: 'red'
+            // },
+            // {
+            //     type: 'line',
+            //     label: '전체 최대 습도',
+            //     data: [...jsMax.humMax],
+            //     backgroundColor: 'black'
+            // },
+            // {
+            //     type: 'line',
+            //     label: '전체 최대 먼지',
+            //     data: [...jsMax.dustMax],
+            //     backgroundColor: 'purple'
+            // },
+            // {
+            //     type: 'line',
+            //     label: '전체 최소 온도',
+            //     data: [...jsMin.tmpMin],
+            //     backgroundColor: 'orange'
+            // },
+            // {
+            //     type: 'line',
+            //     label: '전체 최소 습도',
+            //     data: [...jsMin.humMin],
+            //     backgroundColor: 'yellow'
+            // },
+            // {
+            //     type: 'line',
+            //     label: '전체 최소 먼지',
+            //     data: [...jsMin.dustMin],
+            //     backgroundColor: 'green',
+            // },
         ]
     }
+
+    const meanChart = {
+        labels: [...dateBox],
+        datasets: [
+            {
+                type: 'bar',
+                label: '온도',
+                data: [...mean.tmp],
+                backgroundColor: 'rgb(255, 99, 132)'
+            },
+            {
+                type: 'bar',
+                label: '습도',
+                data: [...mean.hum],
+                backgroundColor: 'rgb(54, 162, 235)'
+            },
+            {
+                type: 'bar',
+                label: '먼지',
+                data: [...mean.dust],
+                backgroundColor: 'rgb(75, 192, 192)'
+            }
+        ]
+    };
+
+    const minMaxChart = {
+        labels: [...dateBox],
+        datasets: [
+            {
+                type: 'line',
+                label: '온도',
+                data: [...min.tmp],
+                backgroundColor: 'rgb(255, 99, 132)'
+            },
+            {
+                type: 'line',
+                label: '습도',
+                data: [...min.hum],
+                backgroundColor: 'rgb(54, 162, 235)'
+            },
+            {
+                type: 'line',
+                label: '먼지',
+                data: [...min.dust],
+                backgroundColor: 'rgb(75, 192, 192)'
+            },
+            {
+                type: 'line',
+                label: '온도',
+                data: [...max.tmp],
+                backgroundColor: 'rgb(255, 99, 132)'
+            },
+            {
+                type: 'line',
+                label: '습도',
+                data: [...max.hum],
+                backgroundColor: 'rgb(54, 162, 235)'
+            },
+            {
+                type: 'line',
+                label: '먼지',
+                data: [...max.dust],
+                backgroundColor: 'rgb(75, 192, 192)'
+            }
+        ]
+    };
+
+    const minChart = {
+        labels: [...dateBox],
+        datasets: [
+            {
+                type: 'line',
+                label: '온도',
+                data: [...min.tmp],
+                backgroundColor: 'rgb(255, 99, 132)'
+            },
+            {
+                type: 'line',
+                label: '습도',
+                data: [...min.hum],
+                backgroundColor: 'rgb(54, 162, 235)'
+            },
+            {
+                type: 'line',
+                label: '먼지',
+                data: [...min.dust],
+                backgroundColor: 'rgb(75, 192, 192)'
+            }
+        ]
+    };
+
+    const maxChart = {
+        labels: [...dateBox],
+        datasets: [
+            {
+                type: 'line',
+                label: '온도',
+                data: [...max.tmp],
+                backgroundColor: 'rgb(255, 99, 132)'
+            },
+            {
+                type: 'line',
+                label: '습도',
+                data: [...max.hum],
+                backgroundColor: 'rgb(54, 162, 235)'
+            },
+            {
+                type: 'line',
+                label: '먼지',
+                data: [...max.dust],
+                backgroundColor: 'rgb(75, 192, 192)'
+            }
+        ]
+    };
 
     const options = {
         scales: {
@@ -296,8 +433,6 @@ function ProductPage(props) {
           ],
         },
       };
-
-      console.log(jsAvg.dustAvg);
 
     const dispatch = useDispatch();
     const url = window.location.href
@@ -324,7 +459,6 @@ function ProductPage(props) {
     useEffect(() => {
         dispatch(auth()).then(response => {
             const userData = response.payload
-            console.log(response.payload)
             if(response.payload){
                 if (!response.payload.isAuth) {
                         props.history.push('/login') // 로그인 안한 유저 차단
@@ -342,7 +476,38 @@ function ProductPage(props) {
     const handleBtnClicked = (event) => {
         const { 
             currentTarget: { value }
-        } = event
+        } = event;
+        if(value === '7') {
+            setAllBox(false);
+            setOneBox(false);
+            setThreeBox(false);
+            setSevenBox(!sevenBox);
+            setMonthBox(false);
+        } else if(value === '3') {
+            setAllBox(false);
+            setOneBox(false);
+            setThreeBox(!threeBox);
+            setSevenBox(false);
+            setMonthBox(false);
+        } else if(value === '1') {
+            setAllBox(false);
+            setOneBox(!oneBox);
+            setThreeBox(false);
+            setSevenBox(false);
+            setMonthBox(false);
+        } else if(value === '30') {
+            setAllBox(false);
+            setOneBox(false);
+            setThreeBox(false);
+            setSevenBox(false);
+            setMonthBox(!monthBox);
+        } else{
+            setAllBox(!allBox);
+            setOneBox(false);
+            setThreeBox(false);
+            setSevenBox(false);
+            setMonthBox(false);
+        }
         setJsLoading(true);
         setBtnResult(value);
     };
@@ -352,18 +517,56 @@ function ProductPage(props) {
             const body = {
                 btnResult,
                 date: null,
-                endDate: null
+                endDate: null,
+                avgCheck,
+                minCheck,
+                maxCheck
             }   
             dispatch(dataDate(id, body))
                 .then(response => {
                     if(response.payload.success) {
                         const res = response.payload.dataList;
+                        const meanArray = response.payload.dataDate.mean;
+                        const minArray = response.payload.dataDate.min;
+                        const maxArray = response.payload.dataDate.max;
+                        const dateArray = response.payload.dateBox;
                             if(jsData.length !== 0) {
                                 setJsData(jsData.filter((_, idx) => idx >= 0))
                             }
                         setJsData([...initialJsValue, ...res])
+                        setMean({
+                            ...mean, ...meanArray
+                        });
+                        setMin({
+                            ...min, ...minArray
+                        });
+                        setMax({
+                            ...max, ...maxArray
+                        });
+                        setDateBox([...dateBox, ...dateArray]);
                     }
                 }) 
+        }
+        return () => {
+            setMean({
+                ...mean,
+                tmp: [],
+                hum: [],
+                dust: []
+            });
+            setMin({
+                ...min,
+                tmp: [],
+                hum: [],
+                dust: []
+            });
+            setMax({
+                ...max,
+                tmp: [],
+                hum: [],
+                dust: []
+            });
+            setDateBox(prev => prev.filter((_, index) => index <= 0));
         }
     }, [btnResult])
 
@@ -373,13 +576,15 @@ function ProductPage(props) {
         const body = {
             btnResult: 0,
             date,
-            endDate
+            endDate,
+            avgCheck,
+            minCheck,
+            maxCheck
         }
         dispatch(dataDate(id, body))
         .then(response => {
             if(response.payload.success){
                 const res = response.payload.dataList;
-                // setDateClick(true);
                 if(jsData.length !== 0) {
                     setJsData(jsData.filter((_, idx) => idx >= 0))
                 }
@@ -390,8 +595,7 @@ function ProductPage(props) {
 
     useEffect(() => {
         setJsLoading(false);
-        // setDateClick(false);
-    }, [jsData])
+    }, [jsData] )
 
     async function jsonHandler (res) {
         try {
@@ -571,12 +775,30 @@ function ProductPage(props) {
                                 <FormBtn value="조회" type="submit">조회</FormBtn>
                             </Form>
                             <BtnContainer>
-                                <DayBtn value={100} type="submit" onClick={handleBtnClicked}>전체</DayBtn>
-                                <DayBtn value={1} type="submit" onClick={handleBtnClicked}>오늘</DayBtn>
-                                <DayBtn value={3} type="submit" onClick={handleBtnClicked}>3일</DayBtn>
-                                <DayBtn value={7} type="submit" onClick={handleBtnClicked}>7일</DayBtn>
-                                <DayBtn value={30} type="submit" onClick={handleBtnClicked}>한달</DayBtn>
+                                <DayBtn value={100} type="submit" onClick={allBox ? null : handleBtnClicked}>전체</DayBtn>
+                                <DayBtn value={1} type="submit" onClick={oneBox ? null : handleBtnClicked}>오늘</DayBtn>
+                                <DayBtn value={3} type="submit" onClick={threeBox ? null : handleBtnClicked}>3일</DayBtn>
+                                <DayBtn value={7} type="submit" onClick={sevenBox ? null : handleBtnClicked}>7일</DayBtn>
+                                <DayBtn value={30} type="submit" onClick={monthBox ? null : handleBtnClicked}>한달</DayBtn>
                             </BtnContainer>
+                                <label>
+                                    평균
+                                    <input type="checkbox" defaultChecked={avgCheck} onChange={
+                                        btnResult ? () => setAvgCheck(!avgCheck) : null
+                                    } />
+                                </label>
+                                <label>
+                                    최대
+                                    <input type="checkbox" defaultChecked={maxCheck} onChange={
+                                        btnResult ? () => setMaxCheck(!maxCheck) : null
+                                    } />
+                                </label>
+                                <label>
+                                    최소
+                                    <input type="checkbox" defaultChecked={minCheck} onChange={
+                                        btnResult ? () => setMinCheck(!minCheck) : null
+                                    } />
+                                </label>
                         </DateHandler>
                     </Box>
                     <Fade left>
@@ -594,7 +816,11 @@ function ProductPage(props) {
                             <ProductDetail {...res} key={res._id} />))}
                         </DataBody>
                     </DataBox>
-                    <Bar data={avgChart} options={options}/>
+                    <div>{minCheck && maxCheck && min && max && jsData ? (<Bar data={minMaxChart} options={options} />) : null}</div>
+                    <div>{minCheck && !maxCheck && min && jsData ? (<Bar data={minChart} options={options} />) : null}</div>
+                    <div>{!minCheck && maxCheck && max && jsData ? (<Bar data={maxChart} options={options} />) : null}</div>
+                    <div>{avgCheck && mean && jsData ? (<Bar data={meanChart} options={options} />) : null}</div>
+                    <Bar data={avgChart} options={options} />
                     </Fade>
                     </WHITEBACK>
         </Container>

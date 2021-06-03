@@ -131,6 +131,7 @@ function DevicePage(props) {
     useEffect(() => {
         dispatch(userDevice(userId))
             .then(response => {
+                console.log(response)
                 for(const data of response.payload.data){
                     if(dataContainer.length === 0){
                         dataContainer.push(data);

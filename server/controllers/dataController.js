@@ -6,26 +6,13 @@ import { PythonShell } from "python-shell";
 
 const scriptPath = '/Users/gim-ingug/Documents/iotserver/pythonCgi'
 const ObjectId = Mongoose.Types.ObjectId;
-// const avgForm = [
-//     { _id: 1, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 2, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 3, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 4, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 5, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 6, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 7, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 8, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 9, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 10, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 11, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0},
-//     { _id: 12, AverageTmpValue: 0, AverageHumValue: 0, AverageDustValue: 0}
-// ];
 
 
 export const dataUser = async(req, res) => {
     const {
         params: { id }
     } = req;
+    console.log(id)
     try {
         PythonShell.run('DevicePage.py', { // 파이썬 파일에게 매개변수 전달
             mode: 'json',
@@ -34,11 +21,13 @@ export const dataUser = async(req, res) => {
             args: id
         }, (err, data) => {
             if(err) {
-                return res.json({ 
+                console.log(err)
+                res.json({ 
                     success: false,
                     error: err
                 })
             }
+            console.log(data);
             res.json({ // 파이썬 파일로부터 처리된 데이터를 클라이언트로 전송
                 success: true,
                 data
@@ -155,7 +144,7 @@ export const deviceDetail = async (req, res) => {
 
 export const postDateData = (req, res) => {
     const { 
-        body: { date, endDate, btnResult },
+        body: { date, endDate, btnResult, avgCheck, minCheck, maxCheck },
         params: { id }
     } = req;
     let convertDate = new Date();
@@ -170,7 +159,6 @@ export const postDateData = (req, res) => {
         const buttonDate = new Date()
         const year = buttonDate.getFullYear();
         const month = buttonDate.getMonth() + 1;  // ????
-        console.log(month)
         const today = buttonDate.getDate() + 1;
         const koreaDate = new Date(Date.UTC(year, month, today));
         const koreaEndDate = new Date(Date.UTC(year, month, today));
@@ -202,28 +190,33 @@ export const postDateData = (req, res) => {
         convertDate = `${convertYear}-${convertMonth < 10 ? `0${convertMonth}` : `${convertMonth}`}-${convertDay < 10 ? `0${convertDay}` : `${convertDay}`}`
         convertEndDate = `${convertEndYear}-${convertEndMonth < 10 ? `0${convertEndMonth}` : `${convertEndMonth}`}-${convertEndDay < 10 ? `0${convertEndDay}` : `${convertEndDay}`}`
     }
+    // console.log(convertDate, convertEndDate)
     PythonShell.run('ProductInputPage.py', {
     mode: 'json',
     pythonOptions: ['-u'],
         scriptPath,
-        args: [id, convertDate, convertEndDate]
+        args: [id, convertDate, convertEndDate, avgCheck, minCheck, maxCheck, btnResult]
     }, (err, data) => {
         if(err) {
-            return res.json({ 
-                success: false,
-                error: err
-            })
+            console.log(err)
+            // return res.json({ 
+            //     success: false,
+            //     error: err
+            // })
         }
-        console.log(data);
-        const dataList = data[0]
+        console.log(data)
+        const dataList = data[0] || []; // 수정해야함 3일 떄 안옴
+        const dataDate = data[1] || [];
+        const dateBox = data[2] || [];
         for(const data of dataList) {
             data.measuredAt = new Date(data.measuredAt['$date']);
             data._id = data._id['$oid'];
         }
-        console.log(dataList)
         return res.json({
             success: true,
-            dataList
+            dataList,
+            dataDate,
+            dateBox
         })
     })
 };
