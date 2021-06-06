@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect} from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import styled from 'styled-components';
 import ko from "date-fns/locale/ko";
-import "react-datepicker/dist/react-datepicker.css" ;
+import "react-datepicker/dist/react-datepicker.css";
 registerLocale('ko', ko)
 
 const DateContainer = styled.div`
@@ -10,26 +10,34 @@ const DateContainer = styled.div`
 `;
 
 const SelectDate = styled(DatePicker)`
-  height: 22px;
-  padding: 6px 12px;
-  font-size: 14px;
+  height: 28px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 16px;
   text-align: center;
   border: 1px solid #e5e5e5;
   outline: none;
   cursor: pointer;
+  &:hover {
+    background-color: #e5e5e5;
+  }
 `;
 
 const BetweenDate = styled.span`
-  display: table;
-  padding: 0px 12px;
-  height: 22px;
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  margin: 0px 5px;
+  padding: 2px 12px;
+  height: 28px;
   background-color: #e5e5e5;
   border: 1px solid #e5e5e5;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
 `;
 
 function DatePick({ date, setDate, endDate, setEndDate }) {
+  
     return (
       <>
         <DateContainer>
@@ -46,6 +54,7 @@ function DatePick({ date, setDate, endDate, setEndDate }) {
             selected={endDate}
             onChange={(date) => setEndDate(date)}
             minDate={date}
+            maxDate={Date.now()}
             dateFormat="yyyy-MM-dd"
             placeholderText="클릭해주세요....."
             locale='ko'

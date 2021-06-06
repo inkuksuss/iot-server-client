@@ -10,7 +10,8 @@ import {
     DELETE_KEY,
     USER_DEVICE,
     DEVICE_DETAIL,
-    DATA_DATE
+    DATA_DATE,
+    GET_WEATHER
 } from '../_actions/types';
 
 export default function (state = {}, action) {
@@ -34,6 +35,8 @@ export default function (state = {}, action) {
         case DEVICE_DETAIL:
             return {...state, data: action.payload};
         case DATA_DATE:
+            return {...state, data: action.payload};
+        case GET_WEATHER:
             return {...state, data: action.payload};
         default:
             return state;

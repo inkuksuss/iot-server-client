@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import socektIO from "socket.io-client";
-import styled, { keyframes } from "styled-components";
-import { dataDate, deviceDetail, auth } from '_actions/user_action';
+import styled, { keyframes, css } from "styled-components";
+import { dataDate, deviceDetail, auth, get_weather } from '_actions/user_action';
 import Loader from "../Loader";
 import DatePick from "./DatePicker";
 import ProductDetail from './ProductDetail';
@@ -11,9 +11,11 @@ import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IOSSwitch from "./IOSSwitch";
 import { Bar } from "react-chartjs-2";
+import { BsFillCaretDownFill, BsFillCaretUpFill } from "react-icons/bs";
 
 
 const socket = socektIO('http://localhost:3001');
+//const socket = socektIO('http://114.71.241.151');
 
 const initialValue = {
     product: null,
@@ -77,7 +79,7 @@ const WHITEBACK = styled.div`
 `;
 
 const Box = styled.div`
-    width: 80%;
+    width: 100%;
     display: grid;
     grid-template-columns: 1fr;
     background-image: linear-gradient(90deg,#000 50%,transparent 0),
@@ -91,14 +93,14 @@ const Box = styled.div`
 const DateHandler = styled.div`
     padding: 30px 0px;
     display: grid;
-    grid-template-columns: 30% 70%;
-    grid-template-rows: 40px 40px;
+    grid-template-columns: 40% 60%;
+    grid-template-rows: 40px 40px 30px;
 `;
 
 const ProductName = styled.span`
     height: 100%;
     font-size: 18px;
-    grid-row: 1 / 3;
+    grid-row: 1 / 4;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -123,6 +125,14 @@ const DayBtn = styled.button`
     }
     :not(:last-child) {
         margin-right: 10px;
+    } 
+    ${props => 
+        props.status && 
+        css`
+            background-color: black;
+            color: #FFFFFF;
+            transition: background-color 0.5s ease-in-out;
+        `} 
     }
 `;
 
@@ -138,6 +148,7 @@ const FormBtn = styled.button`
     border: 1px solid black;
     background-color: #FFFFFF;
     padding: 10px 10px;
+    margin-left: 10px;
     transition: background-color 0.2s linear;
     &:hover {
         color: white;
@@ -147,7 +158,7 @@ const FormBtn = styled.button`
 
 
 const DataBox = styled.table`
-    width: 80%;
+    width: 100%;
     background-image: linear-gradient(
         90deg, #000 50%, transparent 0),linear-gradient(
         90deg, #000 50%, transparent 0),linear-gradient(
@@ -182,29 +193,50 @@ const Th = styled.th`
     width: 20%;
 `;
 
+const OptionContainer = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+`;
+
+const Label = styled.label`
+    margin-left: 10px;
+`;
+
+const OptionInput = styled.input`
+    padding: 5px 10px;
+`;
+
+const SortButton = styled.button`
+    background-color: #FFFFFF;
+    border: none;
+`;
+
+const PublishBox = styled.div`
+    display: flex; 
+    justify-content: center;
+`;
+
+
 function ProductPage(props) {
     
     const [time, setTime] = useState(false);
     const [socketLoading, setSocektLoading] = useState(true);
     const [jsLoading, setJsLoading] = useState(true);
+    const [weatherLoading, setWeatherLoading] = useState(true);
+    const [weatherData, setWeatherData] = useState({});
     const [socketData, setSocketData] = useState(initialValue);
     const [jsData, setJsData] = useState(initialJsValue);
+    const [tmpSort, setTmpSort] = useState(false);
+    const [humSort, setHumSort] = useState(false);
+    const [dustSort, setDustSort] = useState(false);
     const [jsAvg, setJsAvg] = useState({
         tmpAvg: [],
         humAvg: [],
         dustAvg: []
     });
-    const [jsMin, setJsMin] = useState({
-        tmpMin: [],
-        humMin: [],
-        dustMin: []
-    });
-    const [jsMax, setJsMax] = useState({
-        tmpMax: [],
-        humMax: [],
-        dustMax: []
-    });
-
+    
     const [mean, setMean] = useState({
         tmp: [],
         hum: [],
@@ -222,7 +254,6 @@ function ProductPage(props) {
     })
     const [dateBox, setDateBox] = useState([]);
     const [allBox, setAllBox] = useState(false);
-    const [oneBox, setOneBox] = useState(false);
     const [threeBox, setThreeBox] = useState(false);
     const [sevenBox, setSevenBox] = useState(false);
     const [monthBox, setMonthBox] = useState(false);
@@ -230,7 +261,6 @@ function ProductPage(props) {
     const [avgCheck, setAvgCheck] = useState(false);
     const [minCheck, setMinCheck] = useState(false);
     const [maxCheck, setMaxCheck] = useState(false);
-    const [chartLoading, setChartLoading] = useState(false);
     const [date, setDate] = useState(
         new Date(
             new Date().getFullYear(),
@@ -238,14 +268,25 @@ function ProductPage(props) {
             new Date().getDate()
         )
     );
+    const [nodata, setNodata] = useState(false);
     const [endDate, setEndDate] = useState(new Date());
     const [btnResult, setBtnResult] = useState(0);
-    const [checked, setChecked] = useState(false);
+    const [LedChecked, setLedChecked] = useState(false);
+    const [FanChecked, setFanChecked] = useState(false);
+    const [BuzChecked, setBuzChecked] = useState(false);
     const [ledStatus, setLedStatus] = useState({
         auto: false,
         Red: false,
         Yellow: false,
         Green: false
+    });
+    const [fanStatus, setFanStatus] = useState({
+        auto: false,
+        on: false
+    });
+    const [buzStatus, setBuzStatus] = useState({
+        auto: false,
+        on: false
     });
 
     const avgChart = {
@@ -268,48 +309,12 @@ function ProductPage(props) {
                 label: '전체 평균 먼지',
                 data: [...jsAvg.dustAvg],
                 backgroundColor: 'rgb(75, 192, 192)'
-            },
-            // {
-            //     type: 'line',
-            //     label: '전체 최대 온도',
-            //     data: [...jsMax.tmpMax],
-            //     backgroundColor: 'red'
-            // },
-            // {
-            //     type: 'line',
-            //     label: '전체 최대 습도',
-            //     data: [...jsMax.humMax],
-            //     backgroundColor: 'black'
-            // },
-            // {
-            //     type: 'line',
-            //     label: '전체 최대 먼지',
-            //     data: [...jsMax.dustMax],
-            //     backgroundColor: 'purple'
-            // },
-            // {
-            //     type: 'line',
-            //     label: '전체 최소 온도',
-            //     data: [...jsMin.tmpMin],
-            //     backgroundColor: 'orange'
-            // },
-            // {
-            //     type: 'line',
-            //     label: '전체 최소 습도',
-            //     data: [...jsMin.humMin],
-            //     backgroundColor: 'yellow'
-            // },
-            // {
-            //     type: 'line',
-            //     label: '전체 최소 먼지',
-            //     data: [...jsMin.dustMin],
-            //     backgroundColor: 'green',
-            // },
+            }
         ]
     }
 
     const meanChart = {
-        labels: [...dateBox],
+        labels: dateBox,
         datasets: [
             {
                 type: 'bar',
@@ -333,7 +338,7 @@ function ProductPage(props) {
     };
 
     const minMaxChart = {
-        labels: [...dateBox],
+        labels: dateBox,
         datasets: [
             {
                 type: 'line',
@@ -375,7 +380,7 @@ function ProductPage(props) {
     };
 
     const minChart = {
-        labels: [...dateBox],
+        labels: dateBox,
         datasets: [
             {
                 type: 'line',
@@ -399,7 +404,7 @@ function ProductPage(props) {
     };
 
     const maxChart = {
-        labels: [...dateBox],
+        labels: dateBox,
         datasets: [
             {
                 type: 'line',
@@ -451,9 +456,19 @@ function ProductPage(props) {
         Yellow: false,
         Green: false
     });
+    const [fanCheckedBox, setFanCheckedBox] = useState(false);
+    const [buzCheckedBox, setBuzCheckedBox] = useState(false);
 
     const handleLedChange = (event) => {
         setCheckedBox({...checkedBox, [event.target.name]: event.target.checked})
+    }
+
+    const handleFanChange = () => {
+        setFanCheckedBox(!fanCheckedBox);
+    }
+
+    const handleBuzChange = () => {
+        setBuzCheckedBox(!buzCheckedBox);
     }
 
     useEffect(() => {
@@ -479,37 +494,33 @@ function ProductPage(props) {
         } = event;
         if(value === '7') {
             setAllBox(false);
-            setOneBox(false);
             setThreeBox(false);
             setSevenBox(!sevenBox);
             setMonthBox(false);
         } else if(value === '3') {
             setAllBox(false);
-            setOneBox(false);
             setThreeBox(!threeBox);
             setSevenBox(false);
             setMonthBox(false);
         } else if(value === '1') {
             setAllBox(false);
-            setOneBox(!oneBox);
             setThreeBox(false);
             setSevenBox(false);
             setMonthBox(false);
         } else if(value === '30') {
             setAllBox(false);
-            setOneBox(false);
             setThreeBox(false);
             setSevenBox(false);
             setMonthBox(!monthBox);
         } else{
             setAllBox(!allBox);
-            setOneBox(false);
             setThreeBox(false);
             setSevenBox(false);
             setMonthBox(false);
         }
         setJsLoading(true);
         setBtnResult(value);
+        setDateBox(dateBox.filter((_, idx) => idx < 0));
     };
 
     useEffect(() => {
@@ -521,7 +532,14 @@ function ProductPage(props) {
                 avgCheck,
                 minCheck,
                 maxCheck
-            }   
+            } 
+            // setDateBox(dateBox.filter((_, idx) => idx < 0));
+            setAvgCheck(false);
+            setMinCheck(false);
+            setMaxCheck(false);
+            setTmpSort(false);
+            setHumSort(false);
+            setDustSort(false);
             dispatch(dataDate(id, body))
                 .then(response => {
                     if(response.payload.success) {
@@ -531,7 +549,7 @@ function ProductPage(props) {
                         const maxArray = response.payload.dataDate.max;
                         const dateArray = response.payload.dateBox;
                             if(jsData.length !== 0) {
-                                setJsData(jsData.filter((_, idx) => idx >= 0))
+                                setJsData(jsData.filter((_, idx) => idx < 0))
                             }
                         setJsData([...initialJsValue, ...res])
                         setMean({
@@ -544,6 +562,8 @@ function ProductPage(props) {
                             ...max, ...maxArray
                         });
                         setDateBox([...dateBox, ...dateArray]);
+                    } else {
+                        setNodata(true);
                     }
                 }) 
         }
@@ -566,12 +586,17 @@ function ProductPage(props) {
                 hum: [],
                 dust: []
             });
-            setDateBox(prev => prev.filter((_, index) => index <= 0));
         }
     }, [btnResult])
 
     const handleSubmitClicked = (event) => {
         setJsLoading(true);
+        setAvgCheck(false);
+        setMinCheck(false);
+        setMaxCheck(false);
+        setTmpSort(false);
+        setHumSort(false);
+        setDustSort(false);
         event.preventDefault();
         const body = {
             btnResult: 0,
@@ -583,18 +608,35 @@ function ProductPage(props) {
         }
         dispatch(dataDate(id, body))
         .then(response => {
-            if(response.payload.success){
+            if(response.payload.success) {
                 const res = response.payload.dataList;
-                if(jsData.length !== 0) {
-                    setJsData(jsData.filter((_, idx) => idx >= 0))
-                }
+                const meanArray = response.payload.dataDate.mean;
+                const minArray = response.payload.dataDate.min;
+                const maxArray = response.payload.dataDate.max;
+                const dateArray = response.payload.dateBox;
+                    if(jsData.length !== 0) {
+                        setJsData(jsData.filter((_, idx) => idx < 0))
+                    }
                 setJsData([...initialJsValue, ...res])
+                setMean({
+                    ...mean, ...meanArray
+                });
+                setMin({
+                    ...min, ...minArray
+                });
+                setMax({
+                    ...max, ...maxArray
+                });
+                setDateBox([...dateBox, ...dateArray]);
+            } else {
+                setNodata(true);
             }
         })
     };
 
     useEffect(() => {
         setJsLoading(false);
+        
     }, [jsData] )
 
     async function jsonHandler (res) {
@@ -633,23 +675,26 @@ function ProductPage(props) {
         setSocektLoading(true);
         }
     }, [])
-    
+
+    useEffect(() => {
+        dispatch(get_weather(35, 135))
+            .then(response => {
+                const data = response.payload
+                console.log(data)
+                setWeatherData({...weatherData, ...data})
+                setWeatherLoading(false);
+            });
+    }, [])    
 
     useEffect(() => {
         dispatch(deviceDetail(id))
             .then(response => {
                 const success = response.payload.success;
                 if(success) {
-                    const data = response.payload.data;
+                    const data = response.payload.todayContainer;
                     const avgTmpForm = response.payload.avgTmpForm
                     const avgHumForm = response.payload.avgHumForm
                     const avgDustForm = response.payload.avgDustForm
-                    const minTmpForm = response.payload.minTmpForm
-                    const minHumForm = response.payload.minHumForm
-                    const minDustForm = response.payload.minDustForm
-                    const maxTmpForm = response.payload.maxTmpForm
-                    const maxHumForm = response.payload.maxHumForm
-                    const maxDustForm = response.payload.maxDustForm
                     if(data.length !== 0) {
                             setJsData(
                                 jsData.filter((_, index) => index < 0)
@@ -661,16 +706,6 @@ function ProductPage(props) {
                         humAvg: [...avgHumForm],
                         dustAvg: [...avgDustForm]
                     });
-                    setJsMax({
-                        tmpMax: [...maxTmpForm],
-                        humMax: [...maxHumForm],
-                        dustMax: [...maxDustForm]
-                    })
-                    setJsMin({
-                        tmpMin: [...minTmpForm],
-                        humMin: [...minHumForm],
-                        dustMin: [...minDustForm]
-                    })
                     if(jsLoading === true) {
                         setJsLoading(false);
                     }       
@@ -683,13 +718,13 @@ function ProductPage(props) {
         }
     }, [])   
 
-    const publish = (event) => {
+    const publishLed = (event) => {
         const {
              target: { value, name }
         } = event;
         const data = checkedBox;
         const userId = window.localStorage.getItem('id');
-        data['auto'] = checked;
+        data['auto'] = LedChecked;
         data['key'] = value;
         data['product'] = name;
         data['controller'] = userId
@@ -709,14 +744,147 @@ function ProductPage(props) {
         });
     };
 
+    const publishFan = (event) => {
+        const {
+             target: { value, name }
+        } = event;
+        const data = { 'on': fanCheckedBox };
+        const userId = window.localStorage.getItem('id');
+        data['auto'] = FanChecked;
+        data['key'] = value;
+        data['product'] = name;
+        data['controller'] = userId
+        if(data['auto'] === true) {
+            data['on'] = false;
+        }
+        socket.emit("publishFan", data)
+        socket.on('FanResult', result => {
+            if(result.success) {
+                setFanStatus({
+                    ...fanStatus, 
+                    ...result
+                })
+            }
+        });
+    };
+
+    const publishBuz = (event) => {
+        const {
+             target: { value, name }
+        } = event;
+        const data = { 'on': fanCheckedBox };
+        const userId = window.localStorage.getItem('id');
+        data['auto'] = FanChecked;
+        data['key'] = value;
+        data['product'] = name;
+        data['controller'] = userId
+        if(data['auto'] === true) {
+            data['on'] = false;
+        }
+        socket.emit("publishFan", data)
+        socket.on('BuzResult', result => {
+            if(result.success) {
+                setBuzStatus({
+                    ...buzStatus, 
+                    ...result
+                })
+            }
+        });
+    };
 
     const handleCheck = () => {
-        setChecked(!checked);
+        setLedChecked(!LedChecked);
     };
+
+    const handleFanCheck = () => {
+        setFanChecked(!FanChecked);
+    }
+
+    const handleBuzCheck = () => {
+        setBuzChecked(!BuzChecked);
+    }
+
+    useEffect(() => {
+        if(tmpSort) {
+            setJsData(jsData.sort((start, end) => {
+                if(start.tmp > end.tmp) {
+                    return 1;
+                }
+                else if(start.tmp < end.tmp) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }))
+        } else {
+            setJsData(jsData.sort((start, end) => {
+                if(start.tmp < end.tmp) {
+                    return 1;
+                }
+                else if(start.tmp > end.tmp) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }))
+        }
+    }, [tmpSort])
+
+    useEffect(() => {
+        if(humSort) {
+            setJsData(jsData.sort((start, end) => {
+                if(start.hum > end.hum) {
+                    return 1;
+                }
+                else if(start.hum < end.hum) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }))
+        } else {
+            setJsData(jsData.sort((start, end) => {
+                if(start.hum < end.hum) {
+                    return 1;
+                }
+                else if(start.hum > end.hum) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }))
+        }
+    }, [humSort])
+
+    useEffect(() => {
+        if(dustSort) {
+            setJsData(jsData.sort((start, end) => {
+                if(start.dust > end.dust) {
+                    return 1;
+                }
+                else if(start.dust < end.dust) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }))
+        } else {
+            setJsData(jsData.sort((start, end) => {
+                if(start.dust < end.dust) {
+                    return 1;
+                }
+                else if(start.dust > end.dust) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }))
+        }
+    }, [dustSort])
 
 
     return (
-        loading || socketLoading || jsLoading ? (
+        loading || socketLoading || jsLoading || weatherLoading ? (
             <Loader />
             )
             : (
@@ -731,14 +899,15 @@ function ProductPage(props) {
                         <RealTime>{socketData.measuredAt ? (
                         socketData.measuredAt.split('T')[1].split('.000Z')[0]    
                         ) : null}
-                        </RealTime>      
+                        </RealTime>
+                        <PublishBox>      
                         <div>                 
                             <FormGroup>
                                 <FormControlLabel
-                                control={<IOSSwitch checked={checked} onChange={handleCheck} name="checked" />}
+                                control={<IOSSwitch checked={LedChecked} onChange={handleCheck} name="LedChecked" />}
                                 label="AUTO"
                                 />
-                            <div>{checked ? null : (
+                            <div>{LedChecked ? null : (
                                 <FormGroup>
                                     <FormControlLabel
                                     control={<IOSSwitch checked={checkedBox.Red} onChange={handleLedChange} name="Red" />}
@@ -754,16 +923,51 @@ function ProductPage(props) {
                                     />
                                 </FormGroup>
                             )}</div>
-                            <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publish}>제어</button>
+                            <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishLed}>제어</button>
                             </FormGroup>
-                            </div>
+                        </div>
+                        <div>                 
+                            <FormGroup>
+                                <FormControlLabel
+                                control={<IOSSwitch checked={FanChecked} onChange={handleFanCheck} name="FanChecked" />}
+                                label="AUTO"
+                                />
+                            <div>{FanChecked ? null : (
+                                <FormGroup>
+                                    <FormControlLabel
+                                    control={<IOSSwitch checked={fanCheckedBox} onChange={handleFanChange} name="on" />}
+                                    label="Fan"
+                                    />
+                                </FormGroup>
+                            )}</div>
+                            <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishFan}>제어</button>
+                            </FormGroup>
+                        </div>
+                        <div>                 
+                            <FormGroup>
+                                <FormControlLabel
+                                control={<IOSSwitch checked={BuzChecked} onChange={handleBuzCheck} name="BuzChecked" />}
+                                label="AUTO"
+                                />
+                            <div>{BuzChecked ? null : (
+                                <FormGroup>
+                                    <FormControlLabel
+                                    control={<IOSSwitch checked={buzCheckedBox} onChange={handleBuzChange} name="on" />}
+                                    label="Buz"
+                                    />
+                                </FormGroup>
+                            )}</div>
+                            <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishBuz}>제어</button>
+                            </FormGroup>
+                        </div>
+                    </PublishBox>
                         </Fade>
                     </RealTimeContainer>
                     <WHITEBACK>
                     <Box>
                         <DateHandler>
                             <ProductName>
-                                <span>제품번호: {socketData.keyName}</span>
+                                <h1 style={{fontSize: "28px"}}>Device: {socketData.keyName}</h1>
                             </ProductName>
                             <Form onSubmit={handleSubmitClicked}>
                                 <DatePick
@@ -772,33 +976,34 @@ function ProductPage(props) {
                                 endDate={endDate}
                                 setEndDate={setEndDate}
                                 />
-                                <FormBtn value="조회" type="submit">조회</FormBtn>
+                                <FormBtn value="조회" type="submit" onClick={() => setDateBox(dateBox.filter((_,idx) => idx < 0))}>조회</FormBtn>
                             </Form>
                             <BtnContainer>
-                                <DayBtn value={100} type="submit" onClick={allBox ? null : handleBtnClicked}>전체</DayBtn>
-                                <DayBtn value={1} type="submit" onClick={oneBox ? null : handleBtnClicked}>오늘</DayBtn>
-                                <DayBtn value={3} type="submit" onClick={threeBox ? null : handleBtnClicked}>3일</DayBtn>
-                                <DayBtn value={7} type="submit" onClick={sevenBox ? null : handleBtnClicked}>7일</DayBtn>
-                                <DayBtn value={30} type="submit" onClick={monthBox ? null : handleBtnClicked}>한달</DayBtn>
+                                <DayBtn value={100} type="submit" onClick={allBox ? null : handleBtnClicked} status={allBox}>일년</DayBtn>
+                                <DayBtn value={3} type="submit" onClick={threeBox ? null : handleBtnClicked} status={threeBox}>3일</DayBtn>
+                                <DayBtn value={7} type="submit" onClick={sevenBox ? null : handleBtnClicked} status={sevenBox}>7일</DayBtn>
+                                <DayBtn value={30} type="submit" onClick={monthBox ? null : handleBtnClicked} status={monthBox}>한달</DayBtn>
                             </BtnContainer>
-                                <label>
+                            <OptionContainer>
+                                <Label>
                                     평균
-                                    <input type="checkbox" defaultChecked={avgCheck} onChange={
-                                        btnResult ? () => setAvgCheck(!avgCheck) : null
+                                    <OptionInput type="checkbox" defaultChecked={avgCheck} onChange={
+                                        jsData ? () => setAvgCheck(!avgCheck) : null
                                     } />
-                                </label>
-                                <label>
+                                </Label>
+                                <Label>
                                     최대
-                                    <input type="checkbox" defaultChecked={maxCheck} onChange={
-                                        btnResult ? () => setMaxCheck(!maxCheck) : null
+                                    <OptionInput type="checkbox" defaultChecked={maxCheck} onChange={
+                                        jsData ? () => setMaxCheck(!maxCheck) : null
                                     } />
-                                </label>
-                                <label>
+                                </Label>
+                                <Label>
                                     최소
-                                    <input type="checkbox" defaultChecked={minCheck} onChange={
-                                        btnResult ? () => setMinCheck(!minCheck) : null
+                                    <OptionInput type="checkbox" defaultChecked={minCheck} onChange={
+                                        jsData ? () => setMinCheck(!minCheck) : null
                                     } />
-                                </label>
+                                </Label>
+                            </OptionContainer>
                         </DateHandler>
                     </Box>
                     <Fade left>
@@ -806,21 +1011,30 @@ function ProductPage(props) {
                         <DataHeader>
                             <Tr>
                                 <Th>측정시간</Th>
-                                <Th>상태</Th>
-                                <Th>온도</Th>
-                                <Th>습도</Th>
-                                <Th>미세먼지</Th>
+                                <Th>
+                                    <span>온도</span>
+                                    <SortButton value="tmp" onClick={() => setTmpSort(!tmpSort)}>{!tmpSort ? <BsFillCaretDownFill/> : <BsFillCaretUpFill/>}</SortButton>
+                                </Th>
+                                <Th>
+                                    <span>습도</span>
+                                    <SortButton value="hum" onClick={() => setHumSort(!humSort)}>{!humSort ? <BsFillCaretDownFill/> : <BsFillCaretUpFill/>}</SortButton>
+                                </Th>
+                                <Th>
+                                    <span>미세먼지</span>
+                                    <SortButton value="dust" onClick={() => setDustSort(!dustSort)}>{!dustSort ? <BsFillCaretDownFill/> : <BsFillCaretUpFill/>}</SortButton>
+                                </Th>
                             </Tr>
                         </DataHeader>
-                        <DataBody style={{marginTop: "45px"}}>{jsData.length && jsData.map(res => (
-                            <ProductDetail {...res} key={res._id} />))}
+                        <DataBody style={{marginTop: "45px"}}>{jsData.length > 0 ? jsData.map(res => (
+                            <ProductDetail {...res} key={res._id} />)) : (<tr><td colSpan="5"><h1 style={{display:"flex",  justifyContent:"center"}}>데이터 없음</h1></td></tr>) }
                         </DataBody>
+                        <DataBody style={{marginTop: "45px"}}>{nodata ? <h1>데이터가 없습니다</h1> : null}</DataBody>
                     </DataBox>
-                    <div>{minCheck && maxCheck && min && max && jsData ? (<Bar data={minMaxChart} options={options} />) : null}</div>
-                    <div>{minCheck && !maxCheck && min && jsData ? (<Bar data={minChart} options={options} />) : null}</div>
-                    <div>{!minCheck && maxCheck && max && jsData ? (<Bar data={maxChart} options={options} />) : null}</div>
-                    <div>{avgCheck && mean && jsData ? (<Bar data={meanChart} options={options} />) : null}</div>
-                    <Bar data={avgChart} options={options} />
+                    <div>{minCheck && maxCheck && min && max && jsData ? (<Bar data={minMaxChart} options={options} style={{height:"500px", width:"80vw"}} />) : null}</div>
+                    <div>{minCheck && !maxCheck && min && jsData ? (<Bar data={minChart} options={options} style={{height:"500px", width:"80vw"}} />) : null}</div>
+                    <div>{!minCheck && maxCheck && max && jsData ? (<Bar data={maxChart} options={options} style={{height:"500px", width:"80vw"}} />) : null}</div>
+                    <div>{avgCheck && mean && jsData ? (<Bar data={meanChart} options={options} style={{height:"500px", width:"80vw"}} />) : null}</div>
+                    <Bar data={avgChart} options={options} style={{height:"500px", width:"80vw"}} />
                     </Fade>
                     </WHITEBACK>
         </Container>

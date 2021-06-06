@@ -51,6 +51,7 @@ const SliderContainer = styled.div`
 let total_slides = 0;
 
 const socket = socektIO('http://localhost:3001'); // 소켓 연결
+//const socket = socektIO('http://114.71.241.151:3001'); // 소켓 연결
 
 function DevicePage(props) {
     const userId = useSelector(state => state.user.userData.id); 

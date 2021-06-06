@@ -9,6 +9,11 @@ import Product from './models/Product';
 import User from "./models/User";
 import Led from "./models/Led";
 
+const options = {
+    port: 1883,
+    username: 'inguk',
+    password: 'ccit2'
+}
 
 dotenv.config();
 
@@ -23,11 +28,11 @@ const server = app.listen(PORT, handleListing); // 포트지정 및 콜백함수
 
 //mqtt server
 const client = mqtt.connect("mqtt://127.0.0.1");
+// const client = mqtt.connect("mqtt://127.0.0.1", options);
 
 client.on("connect", () => { // mqtt 연결하기
     console.log("😇Mqtt Connect");
     client.subscribe('jb/shilmu/scle/smenco/apsr/+/input/+'); // 읽을 토픽
-    client.subscribe('jb/shilmu/scle/smenco/apsr/+/output/led');
     client.subscribe('jb/shilmu/scle/smenco/apsr/+/output/led/res');
 });
 
@@ -50,7 +55,7 @@ client.on("message", async (topic, message) => { // 구독한 토픽으로부터
                 if(product.user) {
                     const userId = product.user; 
                     const pms = await Pms.create({ // 데이터 디비에 새로운 객체 생성 및 저장
-                        dust: obj.dust,
+                        dust: obj.dust / 100,
                         measuredAt: obj.measuredAt,
                         key: obj.key,
                         controller: userId,
@@ -73,8 +78,8 @@ client.on("message", async (topic, message) => { // 구독한 토픽으로부터
                     if(product.user) {
                         const userId = product.user;
                         const dht = await Dht.create({
-                            tmp: obj.tmp,
-                            hum: obj.hum,
+                            tmp: obj.tmp / 100,
+                            hum: obj.hum / 100,
                             measuredAt: obj.measuredAt,
                             key: obj.key,
                             controller: userId,
@@ -101,6 +106,13 @@ const io = socketIO(server, {
         methods: ["GET", "POST"]
     }
 }); // 소켓 cors 설정
+
+// const io = socketIO(server, {
+//     cors: {
+//         origin: "*",
+//         methods: ["GET", "POST"]
+//     }
+// }); // 소켓 cors 설정
 
 // Mqtt 데이터
 io.on("connection", socket => { // 소켓 연결
@@ -192,12 +204,13 @@ io.on("connection", socket => { // 소켓 연결
                             return console.log(err) // 에러발생시
                         }
                         client.on('message', async(LedTopicRes, response) => { // 에러없다면 콜백토픽 서브
-                            if(String(LedTopicRes.split('/')[5]) === key) {
+                            const ledTopic = LedTopicRes.split('/');
+                            if(String(ledTopic[5]) === key && ledTopic[6] === 'output' && ledTopic[7] === 'led' && ledTopic[8] === 'res') {
                                 if(response) { // 데이터가 있다면
                                     const result = JSON.parse(response.toString()); // 데이터 파싱
-                                    console.log(result)
                                     if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
                                         const led = await Led.create({
+                                            auto: result.auto,
                                             Red: result.Red,
                                             Green: result.Green,
                                             Yellow: result.Yellow,
@@ -208,6 +221,110 @@ io.on("connection", socket => { // 소켓 연결
                                         })                    
                                         led.save();
                                         socket.emit('LEDResult', result); // 웹으로 실시간 결과 전달
+                                    }
+                                }
+                            }
+                        });
+                    });
+                }
+            } catch(err) {
+                console.log(err);
+            }
+        })
+        socket.on("publishFan", async(data) => {
+            const { on, auto, key, product, controller } = data
+            const fanTopic = `jb/shilmu/scle/smenco/apsr/${key}/output/fan`; // 퍼블리쉬 토픽
+            const date = new Date(); // 서버에서 전송받은 시간 
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = date.getDate();
+            const hours = date.getHours();
+            const mintues = date.getMinutes();
+            const seconds = date.getSeconds();
+            const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
+            try {
+                const user = await User.findById(controller)
+                const products = await User.findOne({ keyList: {$in : [ product ]} });
+                const keyCheck = await Product.findById(product)
+                if(user.id === products.id && keyCheck.keyName === String(key)) {
+                    const verifyData = {
+                        on,
+                        auto,
+                        key
+                    }
+                    const fanJson = JSON.stringify(verifyData); // 웹에서 받은 데이터 제이슨화
+                    client.publish(fanTopic, fanJson, (err) => { // 퍼블리쉬
+                        if(err) {
+                            return console.log(err) // 에러발생시
+                        }
+                        client.on('message', async(fanTopicRes, response) => { // 에러없다면 콜백토픽 서브
+                            const fanTopic = fanTopicRes.split('/');
+                            if(String(fanTopic[5]) === key && fanTopic[6] === 'output' && fanTopic[7] === 'fan' && fanTopic[8] === 'res') {
+                                if(response) { // 데이터가 있다면
+                                    const result = JSON.parse(response.toString()); // 데이터 파싱
+                                    if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                        const fan = await Fan.create({
+                                            auto: result.auto,
+                                            on: result.on,
+                                            measuredAt,
+                                            controller,
+                                            product,
+                                            key
+                                        })                    
+                                        fan.save();
+                                        socket.emit('fanResult', result); // 웹으로 실시간 결과 전달
+                                    }
+                                }
+                            }
+                        });
+                    });
+                }
+            } catch(err) {
+                console.log(err);
+            }
+        })
+        socket.on("publishBuz", async(data) => {
+            const { on, auto, key, product, controller } = data
+            const buzTopic = `jb/shilmu/scle/smenco/apsr/${key}/output/buz`; // 퍼블리쉬 토픽
+            const date = new Date(); // 서버에서 전송받은 시간 
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = date.getDate();
+            const hours = date.getHours();
+            const mintues = date.getMinutes();
+            const seconds = date.getSeconds();
+            const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
+            try {
+                const user = await User.findById(controller)
+                const products = await User.findOne({ keyList: {$in : [ product ]} });
+                const keyCheck = await Product.findById(product)
+                if(user.id === products.id && keyCheck.keyName === String(key)) {
+                    const verifyData = {
+                        on,
+                        auto,
+                        key
+                    }
+                    const buzJson = JSON.stringify(verifyData); // 웹에서 받은 데이터 제이슨화
+                    client.publish(buzTopic, buzJson, (err) => { // 퍼블리쉬
+                        if(err) {
+                            return console.log(err) // 에러발생시
+                        }
+                        client.on('message', async(buzTopicRes, response) => { // 에러없다면 콜백토픽 서브
+                            const buzTopic = buzTopicRes.split('/');
+                            if(String(buzTopic[5]) === key && buzTopic[6] === 'output' && buzTopic[7] === 'buz' && buzTopic[8] === 'res') {
+                                if(response) { // 데이터가 있다면
+                                    const result = JSON.parse(response.toString()); // 데이터 파싱
+                                    if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                        const buz = await Buz.create({
+                                            auto: result.auto,
+                                            on: result.on,
+                                            measuredAt,
+                                            controller,
+                                            product,
+                                            key
+                                        })                    
+                                        buz.save();
+                                        socket.emit('buzResult', result); // 웹으로 실시간 결과 전달
                                     }
                                 }
                             }

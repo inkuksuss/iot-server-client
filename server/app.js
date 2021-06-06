@@ -12,6 +12,7 @@ import routes from "./routes";
 
 const app = express();
 const cors_origin = [`http://localhost:3000`];
+// const cors_origin = [`http://114.71.241.151:3000`];
 
 //middlewares
 app.use(helmet({ 

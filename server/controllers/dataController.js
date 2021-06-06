@@ -8,55 +8,46 @@ const scriptPath = '/Users/gim-ingug/Documents/iotserver/pythonCgi'
 const ObjectId = Mongoose.Types.ObjectId;
 
 
-export const dataUser = async(req, res) => {
+export const dataUser = (req, res) => {
     const {
         params: { id }
     } = req;
-    console.log(id)
-    try {
-        PythonShell.run('DevicePage.py', { // 파이썬 파일에게 매개변수 전달
-            mode: 'json',
-            pythonOptions: ['-u'],
-            scriptPath,
-            args: id
-        }, (err, data) => {
-            if(err) {
-                console.log(err)
-                res.json({ 
-                    success: false,
-                    error: err
-                })
-            }
-            console.log(data);
-            res.json({ // 파이썬 파일로부터 처리된 데이터를 클라이언트로 전송
-                success: true,
-                data
+    PythonShell.run('DevicePage.py', { // 파이썬 파일에게 매개변수 전달
+        mode: 'json',
+        pythonOptions: ['-u'],
+        scriptPath,
+        args: id
+    }, (err, data) => {
+        if(err) {
+            console.log(err)
+            res.json({ 
+                success: false,
+                error: err
             })
+        }
+        console.log(data);
+        res.json({ // 파이썬 파일로부터 처리된 데이터를 클라이언트로 전송
+            success: true,
+            data
         })
-    } catch(err) {
-        throw Error();
-    }
+    })
 };
 
 export const deviceDetail = async (req, res) => {
     const {
         params: { id }
     } = req;
-    let dataArray = [];
     let avgTmpForm = [0,0,0,0,0,0,0,0,0,0,0,0];
     let avgHumForm = [0,0,0,0,0,0,0,0,0,0,0,0];
     let avgDustForm = [0,0,0,0,0,0,0,0,0,0,0,0];
-
-    let minTmpForm = [0,0,0,0,0,0,0,0,0,0,0,0];
-    let minHumForm = [0,0,0,0,0,0,0,0,0,0,0,0];
-    let minDustForm = [0,0,0,0,0,0,0,0,0,0,0,0];
-    
-    let maxTmpForm = [0,0,0,0,0,0,0,0,0,0,0,0];
-    let maxHumForm = [0,0,0,0,0,0,0,0,0,0,0,0];
-    let maxDustForm = [0,0,0,0,0,0,0,0,0,0,0,0];
-
+    const korea = new Date(); 
+    const year = korea.getFullYear();
+    const month = korea.getMonth();
+    const date = korea.getDate();
+    const endDate = korea.getDate() + 1;
+    const today = new Date(Date.UTC(year, month, date));
+    const tomorrow = new Date(Date.UTC(year, month, endDate));
     try {
-        const dhtArray = await Dht.find({ product: id }).select('_id tmp hum measuredAt')
         const dhtCalculator = await Dht.aggregate([
             { $match: { product: new ObjectId(id) }},
             {
@@ -64,10 +55,6 @@ export const deviceDetail = async (req, res) => {
                     "_id": {"$month": {"$toDate":"$measuredAt"}},
                     AverageTmpValue: { $avg: "$tmp" },
                     AverageHumValue: { $avg: "$hum" },
-                    MaxTmpValue: { $max: "$tmp" },
-                    MaxHumValue: { $max: "$hum" },
-                    MinTmpValue: { $min: "$tmp" },
-                    MinHumValue: { $min: "$hum" }
                 }
             }
         ])
@@ -76,69 +63,85 @@ export const deviceDetail = async (req, res) => {
             {
                 $group: {
                     "_id": {"$month": {"$toDate":"$measuredAt"}},
-                    AverageDustValue: { $avg: "$dust" },
-                    MaxDustValue: { $max: "$dust"},
-                    MinDustValue: { $min: "$dust"}
+                    AverageDustValue: { $avg: "$dust" }
                 }
             }
         ])
+        const dhtHourCalculator = await Dht.aggregate([
+            { $match: { $and: [{ product: new ObjectId(id) }, { measuredAt: { $gte: today, $lt: tomorrow }}] }},
+            {
+                $group: {
+                    "_id": {"$month": {"$toDate":"$measuredAt"}},
+                    AverageTmpValue: { $avg: "$tmp" },
+                    AverageHumValue: { $avg: "$hum" }
+                }
+            }
+        ])
+        const pmsHourCalculator = await Pms.aggregate([
+            { $match: { $and: [{ product: new ObjectId(id) }, { measuredAt: { $gte: today, $lt: tomorrow }}] }},
+            {
+                $group: {
+                    "_id": {"$month": {"$toDate":"$measuredAt"}},
+                    AverageDustValue: { $avg: "$dust" }
+                }
+            }
+        ])
+        let todayContainer = [];
+        if(dhtHourCalculator && pmsHourCalculator) {
+            const { tmp, hum, measuredAt } = dhtHourCalculator;
+            const { dust } = pmsHourCalculator
+            for (const dht of dhtHourCalculator) {
+                for(const pms of dhtHourCalculator) {
+                    if(measuredAt === pms.measuredAt) {
+                        const data = {
+                            tmp,
+                            hum,
+                            dust,
+                            measuredAt
+                        }
+                            todayContainer.push(data);
+                    }
+                }
+            }
+        }
 
         for (const dht of dhtCalculator) {
             avgTmpForm.splice((dht._id - 1), 1, dht.AverageTmpValue);
             avgHumForm.splice((dht._id - 1), 1, dht.AverageHumValue);
-            minTmpForm.splice((dht._id - 1), 1, dht.MinTmpValue);
-            minHumForm.splice((dht._id - 1), 1, dht.MinHumValue);
-            maxTmpForm.splice((dht._id - 1), 1, dht.MaxTmpValue);
-            maxHumForm.splice((dht._id - 1), 1, dht.MaxHumValue);
         }
         for (const pms of pmsCalculator) {
             avgDustForm.splice((pms._id - 1), 1, pms.AverageDustValue);
-            minDustForm.splice((pms._id - 1), 1, pms.MinDustValue);
-            maxDustForm.splice((pms._id - 1), 1, pms.MaxDustValue);
         }
-    
-        if(dhtArray) {
-            for (const dht of dhtArray) {
-                // const pms = await Pms.findOne({ product: id, measuredAt: dht.measuredAt }).select('-_id dust')
-                const pms = await Pms.findOne({ product: id }).select('-_id dust')
-                if(pms){
-                    const data = {
-                        _id: dht._id,
-                        tmp: dht.tmp,
-                        hum: dht.hum,
-                        dust: pms.dust,
-                        measuredAt: dht.measuredAt
-                    }
-                    dataArray.push(data)
-                }
-            }
-            if(dataArray.length !== 0) {
-                res.json({
-                    success: true,
-                    data: dataArray.reverse(),
-                    avgTmpForm,
-                    avgHumForm,
-                    avgDustForm,
-                    minTmpForm,
-                    minHumForm,
-                    minDustForm,
-                    maxTmpForm,
-                    maxHumForm,
-                    maxDustForm
-                })
-            } else {
-                res.json({
-                    success: false,
-                    data: []
-                })        
-            }
-        }
+        // for (const dht of dhtArray) {
+        //     // const pms = await Pms.findOne({ product: id, measuredAt: dht.measuredAt }).select('-_id dust') // 실재
+        //     const pms = await Pms.findOne({ product: id }).select('-_id dust')
+        //     if(pms){
+        //         const data = {
+        //             _id: dht._id,
+        //             tmp: dht.tmp,
+        //             hum: dht.hum,
+        //             dust: pms.dust,
+        //             measuredAt: dht.measuredAt
+        //         }
+        //         dataArray.push(data)
+        //     }
+        // }
+        res.status(200).
+            json({
+                success: true,
+                avgTmpForm,
+                avgHumForm,
+                avgDustForm,
+                todayContainer // reverse()
+                // data: dataArray.reverse(),
+            })
     } catch(err) {
         console.log(err)
-        res.json({
-            success: false,
-            data: []
-        })
+        res.status(204)
+            .json({
+                success: false,
+                data: []
+            })
     }
 };
 
@@ -149,34 +152,31 @@ export const postDateData = (req, res) => {
     } = req;
     let convertDate = new Date();
     let convertEndDate = new Date();
+    const intResult = parseInt(btnResult)
     if( btnResult === 0 && (endDate && date) !== null ) {
         // 기간선택
         convertDate = date.split('T')[0];
         convertEndDate = endDate.split('T')[0];
     } else {
         //버튼
-        const intResult = parseInt(btnResult)
         const buttonDate = new Date()
         const year = buttonDate.getFullYear();
         const month = buttonDate.getMonth() + 1;  // ????
-        const today = buttonDate.getDate() + 1;
+        const today = buttonDate.getDate();
         const koreaDate = new Date(Date.UTC(year, month, today));
         const koreaEndDate = new Date(Date.UTC(year, month, today));
         switch (intResult) {
-            case 1:
-                koreaDate.setDate(koreaDate.getDate() - 1)
-                break;
             case 3:
-                koreaDate.setDate(koreaDate.getDate() - 3)
+                koreaDate.setDate(koreaDate.getDate() - 2)
                 break;
             case 7:
-                koreaDate.setDate(koreaDate.getDate() - 7)
+                koreaDate.setDate(koreaDate.getDate() - 6)
                 break;
             case 30:
                 koreaDate.setMonth(koreaDate.getMonth() - 1)
                 break;
             case 100:
-                koreaDate.setFullYear(koreaDate.getFullYear() - 5)
+                koreaDate.setFullYear(koreaDate.getFullYear() - 1)
                 break;
             default:
                 break;
@@ -190,12 +190,12 @@ export const postDateData = (req, res) => {
         convertDate = `${convertYear}-${convertMonth < 10 ? `0${convertMonth}` : `${convertMonth}`}-${convertDay < 10 ? `0${convertDay}` : `${convertDay}`}`
         convertEndDate = `${convertEndYear}-${convertEndMonth < 10 ? `0${convertEndMonth}` : `${convertEndMonth}`}-${convertEndDay < 10 ? `0${convertEndDay}` : `${convertEndDay}`}`
     }
-    // console.log(convertDate, convertEndDate)
+    console.log(convertDate, convertEndDate)
     PythonShell.run('ProductInputPage.py', {
     mode: 'json',
     pythonOptions: ['-u'],
         scriptPath,
-        args: [id, convertDate, convertEndDate, avgCheck, minCheck, maxCheck, btnResult]
+        args: [id, convertDate, convertEndDate, avgCheck, minCheck, maxCheck, intResult]
     }, (err, data) => {
         if(err) {
             console.log(err)
@@ -204,19 +204,24 @@ export const postDateData = (req, res) => {
             //     error: err
             // })
         }
-        console.log(data)
-        const dataList = data[0] || []; // 수정해야함 3일 떄 안옴
-        const dataDate = data[1] || [];
-        const dateBox = data[2] || [];
-        for(const data of dataList) {
-            data.measuredAt = new Date(data.measuredAt['$date']);
-            data._id = data._id['$oid'];
+        const dateBox = data.length !== 0 ? data[0] : [];
+        const dataDate = data.length !== 0 ? data[1] : {};
+        const dataList = data.length !== 0 ? data[2] : []; 
+        if(dataList !== [] && dataDate !== {} && dateBox !== []) {
+            for(const data of dataList) {
+                data.measuredAt = new Date(data.measuredAt['$date']);
+                data._id = data._id['$oid'];
+            }
+            return res.json({
+                success: true,
+                dataList,
+                dataDate,
+                dateBox
+            })
+        } else {
+            return res.json({
+                success: false
+            })
         }
-        return res.json({
-            success: true,
-            dataList,
-            dataDate,
-            dateBox
-        })
     })
 };
