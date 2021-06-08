@@ -692,9 +692,32 @@ function ProductPage(props) {
                 const success = response.payload.success;
                 if(success) {
                     const data = response.payload.todayContainer;
-                    const avgTmpForm = response.payload.avgTmpForm
-                    const avgHumForm = response.payload.avgHumForm
-                    const avgDustForm = response.payload.avgDustForm
+                    const avgTmpForm = response.payload.avgTmpForm;
+                    const avgHumForm = response.payload.avgHumForm;
+                    const avgDustForm = response.payload.avgDustForm;
+                    const calculated = response.payload.dhtHourCalculator;
+                    if(calculated.length !== 0){
+                        let meanObject = {tmp:[], hum: [], dust: []};
+                        let minObject = {tmp:[], hum: [], dust: []};
+                        let maxObject = {tmp:[], hum: [], dust: []};
+                        let timeArray = [];
+                        for(const cal of calculated) {
+                            meanObject.tmp.push(cal.AverageTmpValue);
+                            meanObject.hum.push(cal.AverageHumValue);
+                            meanObject.dust.push(cal.AverageDustValue);
+                            minObject.tmp.push(cal.MinTmpValue);
+                            minObject.hum.push(cal.MinHumValue);
+                            minObject.dust.push(cal.MinDustValue);
+                            maxObject.tmp.push(cal.MaxTmpValue);
+                            maxObject.hum.push(cal.MaxHumValue);
+                            maxObject.dust.push(cal.MaxDustValue);
+                            timeArray.push(cal._id);
+                        };
+                        setMean({...mean, ...meanObject});
+                        setMin({...min, ...minObject});
+                        setMax({...max, ...maxObject});
+                        setDateBox([...dateBox, ...timeArray]);
+                    }
                     if(data.length !== 0) {
                             setJsData(
                                 jsData.filter((_, index) => index < 0)

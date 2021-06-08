@@ -12,7 +12,8 @@ import Led from "./models/Led";
 const options = {
     port: 1883,
     username: 'inguk',
-    password: 'ccit2'
+    password: 'ccit2',
+    clientId:
 }
 
 dotenv.config();
@@ -27,7 +28,7 @@ const server = app.listen(PORT, handleListing); // 포트지정 및 콜백함수
 
 
 //mqtt server
-const client = mqtt.connect("mqtt://127.0.0.1");
+const client = mqtt.connect("mqtt://127.0.0.1", options);
 // const client = mqtt.connect("mqtt://127.0.0.1", options);
 
 client.on("connect", () => { // mqtt 연결하기

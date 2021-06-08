@@ -67,33 +67,49 @@ export const deviceDetail = async (req, res) => {
                 }
             }
         ])
+        const dhtToday = await Dht.find({ product: id, measuredAt: { $gte: today, $lt: tomorrow }});
+        const pmsToday = await Pms.find({ product: id, measuredAt: { $gte: today, $lt: tomorrow }});
         const dhtHourCalculator = await Dht.aggregate([
             { $match: { $and: [{ product: new ObjectId(id) }, { measuredAt: { $gte: today, $lt: tomorrow }}] }},
             {
                 $group: {
-                    "_id": {"$month": {"$toDate":"$measuredAt"}},
+                    "_id": {"$hour": {"$toDate":"$measuredAt"}},
                     AverageTmpValue: { $avg: "$tmp" },
-                    AverageHumValue: { $avg: "$hum" }
+                    AverageHumValue: { $avg: "$hum" },
+                    MaxTmpValue: { $max: "$tmp"},
+                    MaxHumValue: { $max: "$hum"},
+                    MinTmpValue: { $min: "$tmp"},
+                    MinHumValue: { $min: "$hum"},
                 }
-            }
-        ])
+            },
+            { $sort: { _id: 1 }}
+        ])    
         const pmsHourCalculator = await Pms.aggregate([
             { $match: { $and: [{ product: new ObjectId(id) }, { measuredAt: { $gte: today, $lt: tomorrow }}] }},
             {
                 $group: {
-                    "_id": {"$month": {"$toDate":"$measuredAt"}},
-                    AverageDustValue: { $avg: "$dust" }
+                    "_id": {"$hour": {"$toDate":"$measuredAt"}},
+                    AverageDustValue: { $avg: "$dust" },
+                    MaxDustValue: { $max: "$dust"},
+                    MinDustValue: { $min: "$dust"},
                 }
-            }
+            },
+            { $sort: { _id: 1 }}
         ])
+        if(dhtHourCalculator.length === pmsHourCalculator.length) {
+            for(let i = 0; i < dhtHourCalculator.length; i++) {
+                dhtHourCalculator[i] = {...dhtHourCalculator[i], ...pmsHourCalculator[i]}
+            }
+        }
         let todayContainer = [];
-        if(dhtHourCalculator && pmsHourCalculator) {
-            const { tmp, hum, measuredAt } = dhtHourCalculator;
-            const { dust } = pmsHourCalculator
-            for (const dht of dhtHourCalculator) {
-                for(const pms of dhtHourCalculator) {
-                    if(measuredAt === pms.measuredAt) {
+        if(dhtToday && pmsToday) {
+            for (const dht of dhtToday) {
+                for(const pms of pmsToday) {
+                    const { _id, tmp, hum, measuredAt } = dht;
+                    const { dust } = pms;
+                    if(String(measuredAt) === String(pms.measuredAt)) {
                         const data = {
+                            _id,
                             tmp,
                             hum,
                             dust,
@@ -126,14 +142,15 @@ export const deviceDetail = async (req, res) => {
         //         dataArray.push(data)
         //     }
         // }
+        console.log(todayContainer)
         res.status(200).
             json({
                 success: true,
                 avgTmpForm,
                 avgHumForm,
                 avgDustForm,
-                todayContainer // reverse()
-                // data: dataArray.reverse(),
+                todayContainer: todayContainer.reverse(),
+                dhtHourCalculator
             })
     } catch(err) {
         console.log(err)

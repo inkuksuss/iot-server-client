@@ -15,14 +15,12 @@ const Td = styled.td`
 
 function ProductDetail(props) {
     return (
-        <>
         <Tr>
             <Td>{props.measuredAt ? props.measuredAt.split('T')[0] + " | " + props.measuredAt.split('T')[1].split('.000Z')[0] : null}</Td>
             <Td>{props.tmp}</Td>
             <Td>{props.hum}</Td>
             <Td>{props.dust}</Td>
         </Tr>
-        </>
     )
     
 };
