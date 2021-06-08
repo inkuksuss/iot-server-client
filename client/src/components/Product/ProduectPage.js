@@ -15,7 +15,7 @@ import { BsFillCaretDownFill, BsFillCaretUpFill } from "react-icons/bs";
 
 
 const socket = socektIO('http://localhost:3001');
-//const socket = socektIO('http://114.71.241.151');
+//const socket = socektIO('http://114.71.241.151:3001');
 
 const initialValue = {
     product: null,
