@@ -5,7 +5,8 @@ import { logout } from '_actions/user_action';
 import styled, { keyframes } from "styled-components";
 
 const Container = styled.div`
-    background: linear-gradient(to right, #E2E2E2 0%, #C9D6FF 100% );
+    /* background: linear-gradient(to right, #E2E2E2 0%, #C9D6FF 100% ); */
+    background-color: #FFFFFF;
     width: 100%;
     height: 100vh;
 `;

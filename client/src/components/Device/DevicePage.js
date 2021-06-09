@@ -4,47 +4,82 @@ import { auth, userDevice } from '_actions/user_action';
 import socektIO from "socket.io-client";
 import DeviceDetail from "./DeviceDetail";
 import DevicePython from "./DevicePython";
+import { BsChevronDoubleRight, BsChevronDoubleLeft } from "react-icons/bs"
 import Loader from '../Loader';
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 const initialValue = []
 let dataContainer = [];
 
+const a = keyframes`
+    0% { 
+        background-position: 0 0, 0 100%, 0 0, 100% 0; 
+    }
+    100% {
+        background-position: 30px 0, -30px 100%, 0 -30px, 100% 30px;
+    }
+`;
+
 const Container = styled.div`
-    background: linear-gradient(to right, #ffe259 0%, #ffa751 100%);
+    /* background: linear-gradient(to right, #ffe259 0%, #ffa751 100%); */
+    background-color: #FFFFFF;
     width: 100%;
     height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `;
 
 const Box = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
   height: 100vh;
+  width: 100%;
 `;
 
 const Slider = styled.div`
-  width: 60%;
-  overflow: hidden; // 선을 넘어간 이미지들은 보이지 않도록 처리합니다.
+    width: 60%;
+    overflow: hidden; // 선을 넘어간 이미지들은 보이지 않도록 처리합니다.
+    background-image: linear-gradient(
+        90deg, #000 50%, transparent 0),linear-gradient(
+        90deg, #000 50%, transparent 0),linear-gradient(
+        180deg, #000 50%, transparent 0),linear-gradient(
+        180deg, #000 50%, transparent 0);
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+    background-repeat: repeat-x,repeat-x,repeat-y,repeat-y;
+    background-size: 30px 1px, 30px 1px, 1px 30px, 1px 30px;
+    &:hover {
+        animation: ${a} .4s infinite normal;
+        animation-timing-function: linear;
+    }
+    animation-play-state: paused;
+    height: 50vh;
 `;
 
 const Button = styled.button`
   all: unset;
-  border: 1px solid coral;
+  border: 1px solid black;
   padding: 0.5em 2em;
-  color: coral;
+  color: black;
   border-radius: 10px;
   &:hover {
     transition: all 0.3s ease-in-out;
-    background-color: coral;
+    background-color: black;
     color: #fff;
   }
+  height: 50vh;
+  opacity: 0.4;
 `;
 
 const SliderContainer = styled.div`
   display: flex;
   flex-wrap: nowrap;
   width: 100%;
+  height: 50%;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
   flex: auto;
 `;
 
@@ -186,21 +221,19 @@ function DevicePage(props) {
         : (
         <Container>
             <Box>
+                <Button type="button" onClick={prevSlide}><BsChevronDoubleLeft/></Button>
                 <Slider>
                     <SliderContainer ref={slideRef}>{response.length && response.map((res) => (
                         (<DeviceDetail {...res} key={res.product} />)))
                     }
                     </SliderContainer>
-                    <SliderContainer ref={slideRefPy}>
+                    <SliderContainer style={{opacity:"0.7"}} ref={slideRefPy}>
                         {week[0].length && week[0].map((data,index) => (
                             <DevicePython {...data} key={index} />
                         ))}
-                    </SliderContainer>
-                    <div>
-                        <Button type="button" onClick={prevSlide}>Prev</Button>
-                        <Button type="button" onClick={nextSlide}>Next</Button>
-                    </div>
+                    </SliderContainer>    
                 </Slider>
+                <Button type="button" onClick={nextSlide}><BsChevronDoubleRight/></Button>
             </Box>
         </Container>
         ) 

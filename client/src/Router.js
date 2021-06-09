@@ -31,7 +31,6 @@ function Routers (props) {
         <>
           <Route
             render={({location}) => {
-              console.log(location)
               return (
                 <>
                   {isLogged ? <LoggedHeader /> : <Header />}

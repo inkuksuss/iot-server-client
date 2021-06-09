@@ -44,14 +44,14 @@ const routes = {
     data: DATAS,
     dataUser: id => {
         if (id) {
-          return `data/${id}`;
+          return `/data/${id}`;
         } else {
           return DATA_USER;
         }
     },
     detailData: id => {
       if (id) {
-        return `data/product/${id}`;
+        return `/data/product/${id}`;
       } else {
         return DETAIL_DATA;
       }

@@ -3,14 +3,86 @@ import { useDispatch } from 'react-redux';
 import { addKey, changePassword, auth } from '../../_actions/user_action';
 import MyPageButton from './MyPageButton';
 import Loading from "../Loader";
-import styled from "styled-components";
-import Jump from "react-reveal/Jump";
+import styled, { keyframes } from "styled-components";
 import Zoom from "react-reveal/Zoom";
+import imgA from 'react.png';
+
+const a = keyframes`
+    0% { 
+        background-position: 0 0, 0 100%, 0 0, 100% 0; 
+    }
+    100% {
+        background-position: 30px 0, -30px 100%, 0 -30px, 100% 30px;
+    }
+`;
 
 const Container = styled.div`
-    background: linear-gradient(to right, #ffc3a0 0%, #FFAFBD 100%);
+    /* background: linear-gradient(to right, #ffc3a0 0%, #FFAFBD 100%); */
+    background-color: #FFFFFF;
     width: 100%;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;
+
+const MyInfo = styled.div`
+    margin-top: 50px;
+    display: grid;
+    font-size: 26px;
+    text-align: center;
+    grid-template-columns: 300px 300px;
+    grid-template-rows: 100px 100px;
+    grid-column-gap: 20px;
+`;
+
+const Box = styled.div`
+    &:first-child {
+        grid-row: 1/3;
+    }
+    &:nth-child(2) {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    &:nth-child(3) {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+`;
+
+const H1 = styled.h1`
+    display: flex;
+    padding: 5px 0px;
+    width: 100%;
+    border: 1px solid black;
+    justify-content: center;
+    align-items: center;
+    &:nth-child(odd) {
+        background-color: #FFAFBD;
+    }
+`;
+
+const MyKey = styled.ul`
+    display: flex;
+    width: 620px;
+    flex-direction: column;
+    justify-content: center;
+    background-image: linear-gradient(
+        90deg, #000 50%, transparent 0),linear-gradient(
+        90deg, #000 50%, transparent 0),linear-gradient(
+        180deg, #000 50%, transparent 0),linear-gradient(
+        180deg, #000 50%, transparent 0);
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+    background-repeat: repeat-x,repeat-x,repeat-y,repeat-y;
+    background-size: 30px 1px, 30px 1px, 1px 30px, 1px 30px;
+    &:hover {
+        animation: ${a} .4s infinite normal;
+        animation-timing-function: linear;
+    }
+    animation-play-state: paused;
 `;
 
 function MyPage(props) {
@@ -121,14 +193,24 @@ function MyPage(props) {
             loading ? (<Loading />) : (
             <Container>
                 <Zoom top delay={1000}>
-                <div style={{display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"space-around", height:"150px"}}>
-                    <span>이름:  {user.name}</span>
-                    <span>이메일:  {user.email}</span>
-                    <ul>{user.keyList ? (user.keyList.map((key) => ( key ? (
-                        <MyPageButton {...key} key={key._id}/>) : (null)
-                        ))) : (null)
-                    }</ul>
-                </div>
+                <MyInfo>
+                    <Box>
+                        <img src={imgA} alt={"profile"} width={"300px"} height={"200px"}/>
+                    </Box>
+                    <Box>
+                        <H1>Name</H1>
+                        <H1>{user.name}</H1>
+                    </Box>
+                    <Box>
+                        <H1>E-mail</H1>
+                        <H1>{user.email}</H1>
+                    </Box>
+                </MyInfo>
+                <MyKey><h1 style={{padding:"10px", display:"flex", justifyContent:"center", fontWeight:"600px", fontSize:"22px"}}>나의 제품</h1>
+                    {user.keyList ? (user.keyList.map((key) => ( key ? (
+                    <MyPageButton {...key} key={key._id}/>) : (null)
+                    ))) : (null)
+                }</MyKey>
                 
                 
                 <div style={{marginTop: "150px", display: "flex", justifyContent: "space-around"}}>

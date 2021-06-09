@@ -65,7 +65,8 @@ const RealTime = styled.div`
 `;
 
 const RealTimeContainer = styled.div`
-    background: linear-gradient(to right, #ffe259 0%, #ffa751 100%);
+    /* background: linear-gradient(to right, #ffe259 0%, #ffa751 100%); */
+    background-color: #FFFFFF;
     width: 100%;
     height: 100vh;
     display: flex;

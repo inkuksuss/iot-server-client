@@ -142,7 +142,6 @@ export const deviceDetail = async (req, res) => {
         //         dataArray.push(data)
         //     }
         // }
-        console.log(todayContainer)
         res.status(200).
             json({
                 success: true,

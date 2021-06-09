@@ -3,7 +3,7 @@ import reset from "styled-reset";
 
 const globalStyles = createGlobalStyle`
     ${reset};
-    background-color: black;
+    background-color: #FFFFFF;
     a {
         text-decoration: none;
         color: inherit;
@@ -15,12 +15,12 @@ const globalStyles = createGlobalStyle`
         font-family: "B612 Mono", monospace;
         margin-right: 180px;
     }
-    h1,
+    /* h1,
     h2,
     h3,
     h4 {
         font-family: "DM Serif Display", serif;
-    }
+    } */
 
 .slide-enter {
     opacity: 0;
