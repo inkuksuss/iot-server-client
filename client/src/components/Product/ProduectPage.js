@@ -226,6 +226,27 @@ const PublishBox = styled.div`
     justify-content: center;
 `;
 
+const SliceBox = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: center;
+`;
+
+const SliceBtn = styled.button`
+    font-size: 50px;
+    width: 99%;
+    text-decoration: none;
+    color: black;
+    border: none;
+    background-color: #FFFFFF;
+    transition: background-color 0.2s linear;
+    &:hover {
+        color: white;
+        background-color: black;
+    }
+    margin-bottom: 5px;
+`;
+
 
 function ProductPage(props) {
     
@@ -260,6 +281,7 @@ function ProductPage(props) {
         hum: [],
         dust: []
     })
+    const [n, setN] = useState(1);
     const [dateBox, setDateBox] = useState([]);
     const [allBox, setAllBox] = useState(false);
     const [threeBox, setThreeBox] = useState(false);
@@ -644,7 +666,7 @@ function ProductPage(props) {
 
     useEffect(() => {
         setJsLoading(false);
-        
+        setN(1);
     }, [jsData] )
 
     async function jsonHandler (res) {
@@ -1056,10 +1078,13 @@ function ProductPage(props) {
                                 </Th>
                             </Tr>
                         </DataHeader>
-                        <DataBody style={{marginTop: "20px"}}>{jsData.length > 0 ? jsData.map(res => (
+                        <DataBody style={{marginTop: "20px"}}>{jsData.length > 0 ? jsData.slice(0, 10 * n).map(res => (
                             <ProductDetail {...res} key={res._id} />)) : (<div><h1 style={{display:"flex",  justifyContent:"center"}}>데이터 없음</h1></div>) }
                         </DataBody>
-                        <DataBody style={{marginTop: "20px"}}>{nodata ? <h1>데이터가 없습니다</h1> : null}</DataBody>
+                        <DataBody>{nodata ? <h1>데이터가 없습니다</h1> : null}</DataBody>
+                        <SliceBox>
+                            <SliceBtn type="button" onClick={() => setN(prev => prev + 1)}>+</SliceBtn>
+                        </SliceBox>
                     </DataBox>
                     <div>{minCheck && maxCheck && min && max && jsData ? (<Bar data={minMaxChart} options={options} style={{height:"500px", width:"80vw"}} />) : null}</div>
                     <div>{minCheck && !maxCheck && min && jsData ? (<Bar data={minChart} options={options} style={{height:"500px", width:"80vw"}} />) : null}</div>
