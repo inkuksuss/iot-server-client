@@ -157,9 +157,10 @@ const FormBtn = styled.button`
     }
 `;
 
-
-const DataBox = styled.table`
+const DataBox = styled.div`
     width: 100%;
+    max-height: 100vh;
+    overflow: hidden;
     background-image: linear-gradient(
         90deg, #000 50%, transparent 0),linear-gradient(
         90deg, #000 50%, transparent 0),linear-gradient(
@@ -173,25 +174,31 @@ const DataBox = styled.table`
         animation-timing-function: linear;
     }
     animation-play-state: paused;
-    margin-bottom: 100px;
+    margin-bottom: 50px;
 `;
 
-const DataHeader = styled.thead`
+const DataHeader = styled.div`
     width: 100%;
     font-size: 18px;
 `;
 
-const DataBody = styled.tbody`
+const DataBody = styled.div`
     width: 100%;
 `;
 
-const Tr = styled.tr`
+const Tr = styled.div`
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     height: 30px;
-    line-height: 30px;
 `;
 
-const Th = styled.th`
-    width: 20%;
+const Th = styled.div`
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 10px;
 `;
 
 const OptionContainer = styled.div`
@@ -1049,10 +1056,10 @@ function ProductPage(props) {
                                 </Th>
                             </Tr>
                         </DataHeader>
-                        <DataBody style={{marginTop: "45px"}}>{jsData.length > 0 ? jsData.map(res => (
-                            <ProductDetail {...res} key={res._id} />)) : (<tr><td colSpan="5"><h1 style={{display:"flex",  justifyContent:"center"}}>데이터 없음</h1></td></tr>) }
+                        <DataBody style={{marginTop: "20px"}}>{jsData.length > 0 ? jsData.map(res => (
+                            <ProductDetail {...res} key={res._id} />)) : (<div><h1 style={{display:"flex",  justifyContent:"center"}}>데이터 없음</h1></div>) }
                         </DataBody>
-                        <DataBody style={{marginTop: "45px"}}>{nodata ? <h1>데이터가 없습니다</h1> : null}</DataBody>
+                        <DataBody style={{marginTop: "20px"}}>{nodata ? <h1>데이터가 없습니다</h1> : null}</DataBody>
                     </DataBox>
                     <div>{minCheck && maxCheck && min && max && jsData ? (<Bar data={minMaxChart} options={options} style={{height:"500px", width:"80vw"}} />) : null}</div>
                     <div>{minCheck && !maxCheck && min && jsData ? (<Bar data={minChart} options={options} style={{height:"500px", width:"80vw"}} />) : null}</div>

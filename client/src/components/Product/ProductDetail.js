@@ -5,11 +5,13 @@ import { CgSmileSad, CgSmileNeutral } from 'react-icons/cg';
 import styled from "styled-components";
 
 
-const Tr = styled.tr`
+const Tr = styled.div`
+    height: 30px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
 `;
 
-const Td = styled.td`
-    width: 20%;
+const Td = styled.div`
     text-align: center;
 `;
 
