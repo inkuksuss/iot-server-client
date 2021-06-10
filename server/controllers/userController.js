@@ -17,13 +17,14 @@ export const getMe =  async (req, res) => {
 };
 
 export const postChangePassword =  async (req,res) => {
-    const { body:
-            {
+    const { 
+        body: {
                 oldPassword,
                 Password,
                 Password2,
                 userId
-            }
+        },
+        params: { id }
     } = req; // 비밀번호 변경 관련 클라이언트 데이터
     try {
         if(!userId || !Password || !Password2 || !oldPassword) { // 인증 확인 알고리즘
@@ -38,7 +39,7 @@ export const postChangePassword =  async (req,res) => {
                 message: "비밀번호 확인이 일치하지 않습니다😅"
             })
         }
-        const user = await User.findById(userId); // 모든 정보가 입력됬다면 유저 조회
+        const user = await User.findById(id); // 모든 정보가 입력됬다면 유저 조회
         const checkPassword = await user.checkPassword(oldPassword); // 유저 기존 패스워드 조회
         if(!checkPassword) {
             return res.json({ 
@@ -47,7 +48,7 @@ export const postChangePassword =  async (req,res) => {
             });
         }
         const newPassword = await user.setPassword(Password); // 이상없다면 비밀번호 변경
-        await User.findByIdAndUpdate(userId, { hashedPassword: newPassword });
+        await User.findByIdAndUpdate(id, { hashedPassword: newPassword });
         user.save();
         res.json({
             success: true,

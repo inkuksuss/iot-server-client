@@ -55,8 +55,8 @@ export function auth() {
     }
 };
 
-export function changePassword(dataToSubmit) {
-    const request = api.post('/users/change-password',dataToSubmit)
+export function changePassword(dataToSubmit, id) {
+    const request = api.post(`/users/change-password/${id}`,dataToSubmit)
         .then(response => response.data)
     return {
         type: CHANGE_PASSWORD,

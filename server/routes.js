@@ -9,7 +9,7 @@ const PYTHON = "/python";
 
 // Users
 const USERS = "/users";
-const CHANGE_PASSWORD = "/change-password";
+const CHANGE_PASSWORD = "/change-password/:id";
 const ME = "/me";
 const ADD_KEY = "/addKey";
 const DELETE_KEY = "/deleteKey";
@@ -35,7 +35,13 @@ const routes = {
 
     //Users
     users: USERS,
-    changePassword: CHANGE_PASSWORD,
+    changePassword: id => {
+      if(id) {
+        return `/users/change-password/${id}`;
+      } else {
+        return CHANGE_PASSWORD;
+      }
+    },
     me: ME,
     addKey: ADD_KEY,
     deleteKey: DELETE_KEY,

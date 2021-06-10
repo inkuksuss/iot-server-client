@@ -3,8 +3,9 @@ import { useDispatch } from 'react-redux';
 import { addKey, changePassword, auth } from '../../_actions/user_action';
 import MyPageButton from './MyPageButton';
 import Loading from "../Loader";
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 import Zoom from "react-reveal/Zoom";
+import Slide from "react-reveal/Slide";
 import imgA from 'react.png';
 
 const a = keyframes`
@@ -34,6 +35,7 @@ const MyInfo = styled.div`
     grid-template-columns: 300px 300px;
     grid-template-rows: 100px 100px;
     grid-column-gap: 20px;
+    margin-bottom: 30px;
 `;
 
 const Box = styled.div`
@@ -69,6 +71,7 @@ const MyKey = styled.ul`
     display: flex;
     width: 620px;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
     background-image: linear-gradient(
         90deg, #000 50%, transparent 0),linear-gradient(
@@ -85,8 +88,90 @@ const MyKey = styled.ul`
     animation-play-state: paused;
 `;
 
+const KeyContainer = styled.div`
+    width: 100%;
+    margin-top: 15px;
+`;
+
+const KeyForm = styled.form`
+    width: 100%;
+`;
+
+const KeyAddInput = styled.input`
+    width: 620px;
+    border: none;
+    border-bottom: 1px solid black;
+    height: 30px;
+    margin-bottom: 10px;
+`;
+
+const KeyAddBtn = styled.button`
+    width: 620px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    background-color: #FFFFFF;
+    padding: 5px 0px;
+    transition: background-color 0.2s linear;
+    &:hover {
+        color: white;
+        background-color: black;
+        opacity: 0.3;
+    }
+    border-radius: 30px;
+`;
+
+const PasswordBox = styled.div`
+    width: 620px;
+    margin-top: 30px;
+`;
+
+const PasswordForm = styled.form`
+    width: 620px;
+`;
+
+const PasswordInput = styled.input`
+    width: 100%;
+`;
+
+const PasswordLabel = styled.label`
+    width: 100%;
+`;
+
+const PasswordBtn = styled.button`
+    width: 100%;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    background-color: #FFFFFF;
+    padding: 5px 0px;
+    transition: background-color 0.2s linear;
+    &:hover {
+        color: white;
+        background-color: black;
+        opacity: 0.3;
+    }
+    border-radius: 30px;
+`;
+
+const PwVisualBtn = styled.button`
+    width: 620px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    background-color: #FFFFFF;
+    padding: 5px 0px;
+    transition: background-color 0.2s linear;
+    &:hover {
+        color: white;
+        background-color: black;
+        opacity: 0.3;
+    }
+    border-radius: 30px;
+`;
+
+
 function MyPage(props) {
-    // const user = useSelector(state => state.user.userData); // 스테이트로부터 유저데이터 받아옴
     const dispatch = useDispatch(); // 리덕스 디스패치 
     const [oldPassword, setOldPassword] = useState(""); // 스테이트 관리
     const [Password, setPassword] = useState("");
@@ -99,6 +184,7 @@ function MyPage(props) {
         isAuth: false,
         id: null
     });
+    const [visual, setVisual] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -153,7 +239,7 @@ function MyPage(props) {
             Password2,
             userId: user.id
         }
-        dispatch(changePassword(body))
+        dispatch(changePassword(body, user.id))
         .then(response => {
             if (!response.payload) {
                 return alert("서버로부터 데이터를 받지 못했습니다.");
@@ -206,29 +292,33 @@ function MyPage(props) {
                         <H1>{user.email}</H1>
                     </Box>
                 </MyInfo>
-                <MyKey><h1 style={{padding:"10px", display:"flex", justifyContent:"center", fontWeight:"600px", fontSize:"22px"}}>나의 제품</h1>
+                <MyKey>
+                    <h1 style={{padding: "6px"}}>나의 제품</h1>
                     {user.keyList ? (user.keyList.map((key) => ( key ? (
                     <MyPageButton {...key} key={key._id}/>) : (null)
                     ))) : (null)
                 }</MyKey>
-                
-                
-                <div style={{marginTop: "150px", display: "flex", justifyContent: "space-around"}}>
-                    <form onSubmit={onPasswordSubmitHandler} style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start"}}>
-                        <label>기존 비밀번호</label>
-                        <input type="password" value={oldPassword} onChange={onOldPasswordHandler} />
-                        <label>새 비밀번호</label>
-                        <input type="password" value={Password} onChange={onPasswordHandler} />
-                        <label>비밀번호 확인</label>
-                        <input type="password" value={Password2} onChange={onPasswordHandler2} />
-                        <button type="submit">비밀번호 변경</button>
-                    </form>
-                    <form onSubmit={onNewKeySubmitHandler} style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start"}}>
-                        <label>제품 번호</label>
-                        <input type="text" value={newKey} onChange={onKeyHandler} />
-                        <button type="submit">제품 추가</button>
-                    </form>
-                </div>
+                <KeyContainer>
+                    <KeyForm onSubmit={onNewKeySubmitHandler} style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start"}}>
+                        <KeyAddInput type="text" value={newKey} onChange={onKeyHandler} placeholder="제품번호를 입력해주세요..."/>
+                        <KeyAddBtn type="submit" >+</KeyAddBtn>
+                    </KeyForm>
+                </KeyContainer>
+                <PasswordBox>
+                    {visual ? (
+                    <Slide right>
+                    <PasswordForm onSubmit={onPasswordSubmitHandler} style={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start"}}>
+                        <PasswordLabel>기존 비밀번호</PasswordLabel>
+                        <PasswordInput type="password" value={oldPassword} onChange={onOldPasswordHandler} />
+                        <PasswordLabel>새 비밀번호</PasswordLabel>
+                        <PasswordInput type="password" value={Password} onChange={onPasswordHandler} />
+                        <PasswordLabel>비밀번호 확인</PasswordLabel>
+                        <PasswordInput type="password" value={Password2} onChange={onPasswordHandler2} />
+                        <PasswordBtn type="submit">비밀번호 변경</PasswordBtn>
+                    </PasswordForm>
+                    </Slide>
+                    ) : <PwVisualBtn type="button" onClick={()=>setVisual(!visual)}>비밀번호 변경</PwVisualBtn>}
+                </PasswordBox>
                 </Zoom>
             </Container>)
         }    
