@@ -42,9 +42,9 @@ int_period = int(period.days)
 
 # 데이터 처리
 df_dht = list(
-    dht.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lt': convert_endDate}}).sort("measuredAt", pymongo.DESCENDING))
+    dht.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lte': convert_endDate}}).sort("measuredAt", pymongo.DESCENDING))
 df_pms = list(
-    pms.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lt': convert_endDate}}).sort("measuredAt", pymongo.DESCENDING))
+    pms.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lte': convert_endDate}}).sort("measuredAt", pymongo.DESCENDING))
 
 df_dht_date = list(
     dht.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lt': convert_endDate}},

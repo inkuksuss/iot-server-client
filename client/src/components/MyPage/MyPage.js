@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { addKey, changePassword, auth } from '../../_actions/user_action';
 import MyPageButton from './MyPageButton';
 import Loading from "../Loader";
-import styled, { keyframes, css } from "styled-components";
+import styled, { keyframes } from "styled-components";
 import Zoom from "react-reveal/Zoom";
 import Slide from "react-reveal/Slide";
 import imgA from 'react.png';

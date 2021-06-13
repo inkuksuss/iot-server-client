@@ -1,8 +1,6 @@
-import React, { useEffect } from 'react'
-import { useDispatch } from "react-redux";
+import React from 'react'
 import { withRouter } from 'react-router-dom'; 
-import { logout } from '_actions/user_action';
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 
 const Container = styled.div`
     /* background: linear-gradient(to right, #E2E2E2 0%, #C9D6FF 100% ); */

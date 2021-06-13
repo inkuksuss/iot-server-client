@@ -17,6 +17,42 @@ const Container = styled.div`
     height: 100vh;
 `;
 
+const Input = styled.input`
+    font-weight: 300;
+    border: 0;
+    border-bottom: 1px solid #FFAFBD;
+    width: 100%;
+    height: 36px;
+    font-size: 26px;
+    &:focus {
+        outline: none;
+        box-shadow:none;
+        background:#FFAFBD;
+    }
+`;
+
+const Button = styled.button`
+    width: 100%;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    background-color: #FFFFFF;
+    padding: 5px 0px;
+    transition: background-color 0.2s linear;
+    &:hover {
+        color: white;
+        background-color: #FFAFBD;
+        opacity: 0.3;
+    }
+    border-radius: 30px;
+`;
+
+const Label = styled.label`
+    color:#888;
+    font-size: 24px;
+`;
+
+
 function LoginPage(props) {
     const dispatch = useDispatch(); // 리덕스 dispatch 
     const [Email, setEmail] = useState("") // 이메일과 패스워드를 스테이트로 관리
@@ -84,14 +120,14 @@ function LoginPage(props) {
             <form style={{ display: 'flex', flexDirection: 'column' }}
                 onSubmit={onSubmitHandler}
             >
-                <label>Email</label>
-                <input type="email" value={Email} onChange={onEmailHandler} />
-                <label>Password</label>
-                <input type="password" value={Password} onChange={onPasswordHandler} />
+                <Label>Email</Label>
+                <Input type="email" value={Email} onChange={onEmailHandler} />
+                <Label>Password</Label>
+                <Input type="password" value={Password} onChange={onPasswordHandler} />
                 <br />
-                <button type="submit">
+                <Button type="submit">
                     Login
-                </button>
+                </Button>
             </form>
             </Bounce>
         </Container>

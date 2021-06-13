@@ -8,4 +8,3 @@ export const DELETE_KEY = "delete_key";
 export const USER_DEVICE = "user_device";
 export const DEVICE_DETAIL = "device_detail";
 export const DATA_DATE = "data_date";
-export const GET_WEATHER = "get_wEAther";

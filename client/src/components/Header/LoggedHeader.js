@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link, withRouter } from "react-router-dom";
-import { logout, auth } from "../../_actions/user_action";
+import { logout } from "../../_actions/user_action";
 import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 
 const Button = styled.button`
     position: fixed;

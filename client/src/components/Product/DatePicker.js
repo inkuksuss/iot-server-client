@@ -1,4 +1,4 @@
-import React, { useEffect} from "react";
+import React from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import styled from 'styled-components';
 import ko from "date-fns/locale/ko";

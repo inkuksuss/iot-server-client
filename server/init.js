@@ -55,7 +55,7 @@ client.on("message", async (topic, message) => { // 구독한 토픽으로부터
                 if(product.user) {
                     const userId = product.user; 
                     const pms = await Pms.create({ // 데이터 디비에 새로운 객체 생성 및 저장
-                        dust: obj.dust / 100,
+                        dust: obj.dust,
                         measuredAt: obj.measuredAt,
                         key: obj.key,
                         controller: userId,

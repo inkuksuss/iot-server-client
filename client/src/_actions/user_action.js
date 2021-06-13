@@ -9,8 +9,7 @@ import {
     DELETE_KEY,
     USER_DEVICE,
     DEVICE_DETAIL,
-    DATA_DATE,
-    GET_WEATHER
+    DATA_DATE
 } from './types';
 
 const apiKey = '5c604b15cb7bd1204b67f00b4932e3bc';
@@ -119,12 +118,3 @@ export function dataDate(id, body) {
         payload: request
     }
 };
-
-export function get_weather(lat, lon) {
-    const request = axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`)
-        .then(response => response.data)
-    return {
-        type: GET_WEATHER,
-        payload: request
-    }
-}

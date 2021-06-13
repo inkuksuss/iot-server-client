@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import socektIO from "socket.io-client";
 import styled, { keyframes, css } from "styled-components";
-import { dataDate, deviceDetail, auth, get_weather } from '_actions/user_action';
+import { dataDate, deviceDetail, auth } from '_actions/user_action';
 import Loader from "../Loader";
 import DatePick from "./DatePicker";
 import ProductDetail from './ProductDetail';
@@ -159,7 +159,6 @@ const FormBtn = styled.button`
 
 const DataBox = styled.div`
     width: 100%;
-    max-height: 100vh;
     overflow: hidden;
     background-image: linear-gradient(
         90deg, #000 50%, transparent 0),linear-gradient(
@@ -253,8 +252,6 @@ function ProductPage(props) {
     const [time, setTime] = useState(false);
     const [socketLoading, setSocektLoading] = useState(true);
     const [jsLoading, setJsLoading] = useState(true);
-    const [weatherLoading, setWeatherLoading] = useState(true);
-    const [weatherData, setWeatherData] = useState({});
     const [socketData, setSocketData] = useState(initialValue);
     const [jsData, setJsData] = useState(initialJsValue);
     const [tmpSort, setTmpSort] = useState(false);
@@ -301,9 +298,7 @@ function ProductPage(props) {
     const [nodata, setNodata] = useState(false);
     const [endDate, setEndDate] = useState(new Date());
     const [btnResult, setBtnResult] = useState(0);
-    const [LedChecked, setLedChecked] = useState(false);
-    const [FanChecked, setFanChecked] = useState(false);
-    const [BuzChecked, setBuzChecked] = useState(false);
+    const [AutoChecked, setAutoChecked] = useState(true);
     const [ledStatus, setLedStatus] = useState({
         auto: false,
         Red: false,
@@ -707,16 +702,6 @@ function ProductPage(props) {
     }, [])
 
     useEffect(() => {
-        dispatch(get_weather(35, 135))
-            .then(response => {
-                const data = response.payload
-                console.log(data)
-                setWeatherData({...weatherData, ...data})
-                setWeatherLoading(false);
-            });
-    }, [])    
-
-    useEffect(() => {
         dispatch(deviceDetail(id))
             .then(response => {
                 const success = response.payload.success;
@@ -777,7 +762,7 @@ function ProductPage(props) {
         } = event;
         const data = checkedBox;
         const userId = window.localStorage.getItem('id');
-        data['auto'] = LedChecked;
+        data['auto'] = AutoChecked;
         data['key'] = value;
         data['product'] = name;
         data['controller'] = userId
@@ -803,7 +788,7 @@ function ProductPage(props) {
         } = event;
         const data = { 'on': fanCheckedBox };
         const userId = window.localStorage.getItem('id');
-        data['auto'] = FanChecked;
+        data['auto'] = AutoChecked;
         data['key'] = value;
         data['product'] = name;
         data['controller'] = userId
@@ -825,16 +810,16 @@ function ProductPage(props) {
         const {
              target: { value, name }
         } = event;
-        const data = { 'on': fanCheckedBox };
+        const data = { 'on': buzCheckedBox };
         const userId = window.localStorage.getItem('id');
-        data['auto'] = FanChecked;
+        data['auto'] = AutoChecked;
         data['key'] = value;
         data['product'] = name;
         data['controller'] = userId
         if(data['auto'] === true) {
             data['on'] = false;
         }
-        socket.emit("publishFan", data)
+        socket.emit("publishBuz", data)
         socket.on('BuzResult', result => {
             if(result.success) {
                 setBuzStatus({
@@ -846,16 +831,8 @@ function ProductPage(props) {
     };
 
     const handleCheck = () => {
-        setLedChecked(!LedChecked);
+        setAutoChecked(!AutoChecked);
     };
-
-    const handleFanCheck = () => {
-        setFanChecked(!FanChecked);
-    }
-
-    const handleBuzCheck = () => {
-        setBuzChecked(!BuzChecked);
-    }
 
     useEffect(() => {
         if(tmpSort) {
@@ -937,7 +914,7 @@ function ProductPage(props) {
 
 
     return (
-        loading || socketLoading || jsLoading || weatherLoading ? (
+        loading || socketLoading || jsLoading ? (
             <Loader />
             )
             : (
@@ -957,60 +934,38 @@ function ProductPage(props) {
                         <div>                 
                             <FormGroup>
                                 <FormControlLabel
-                                control={<IOSSwitch checked={LedChecked} onChange={handleCheck} name="LedChecked" />}
+                                control={<IOSSwitch checked={AutoChecked} onChange={handleCheck} name="AutoChecked" />}
                                 label="AUTO"
                                 />
-                            <div>{LedChecked ? null : (
-                                <FormGroup>
-                                    <FormControlLabel
-                                    control={<IOSSwitch checked={checkedBox.Red} onChange={handleLedChange} name="Red" />}
-                                    label="Red"
-                                    />
-                                    <FormControlLabel
-                                    control={<IOSSwitch checked={checkedBox.Yellow} onChange={handleLedChange} name="Yellow" />}
-                                    label="Yellow"
-                                    />
-                                    <FormControlLabel
-                                    control={<IOSSwitch checked={checkedBox.Green} onChange={handleLedChange} name="Green" />}
-                                    label="Green"
-                                    />
-                                </FormGroup>
+                            <div>{AutoChecked ? null : (
+                                <>
+                                    <FormGroup>
+                                        <FormControlLabel
+                                        control={<IOSSwitch checked={checkedBox.Red} onChange={handleLedChange} name="Red" />}
+                                        label="Red"
+                                        />
+                                        <FormControlLabel
+                                        control={<IOSSwitch checked={checkedBox.Yellow} onChange={handleLedChange} name="Yellow" />}
+                                        label="Yellow"
+                                        />
+                                        <FormControlLabel
+                                        control={<IOSSwitch checked={checkedBox.Green} onChange={handleLedChange} name="Green" />}
+                                        label="Green"
+                                        />
+                                        <FormControlLabel
+                                        control={<IOSSwitch checked={fanCheckedBox} onChange={handleFanChange} name="on" />}
+                                        label="Fan"
+                                        />
+                                        <FormControlLabel
+                                        control={<IOSSwitch checked={buzCheckedBox} onChange={handleBuzChange} name="on" />}
+                                        label="Buz"
+                                        />
+                                    </FormGroup>
+                                    <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishLed}>LED제어</button>
+                                    <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishFan}>Fan제어</button>
+                                    <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishBuz}>Buz제어</button>
+                                </>
                             )}</div>
-                            <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishLed}>제어</button>
-                            </FormGroup>
-                        </div>
-                        <div>                 
-                            <FormGroup>
-                                <FormControlLabel
-                                control={<IOSSwitch checked={FanChecked} onChange={handleFanCheck} name="FanChecked" />}
-                                label="AUTO"
-                                />
-                            <div>{FanChecked ? null : (
-                                <FormGroup>
-                                    <FormControlLabel
-                                    control={<IOSSwitch checked={fanCheckedBox} onChange={handleFanChange} name="on" />}
-                                    label="Fan"
-                                    />
-                                </FormGroup>
-                            )}</div>
-                            <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishFan}>제어</button>
-                            </FormGroup>
-                        </div>
-                        <div>                 
-                            <FormGroup>
-                                <FormControlLabel
-                                control={<IOSSwitch checked={BuzChecked} onChange={handleBuzCheck} name="BuzChecked" />}
-                                label="AUTO"
-                                />
-                            <div>{BuzChecked ? null : (
-                                <FormGroup>
-                                    <FormControlLabel
-                                    control={<IOSSwitch checked={buzCheckedBox} onChange={handleBuzChange} name="on" />}
-                                    label="Buz"
-                                    />
-                                </FormGroup>
-                            )}</div>
-                            <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishBuz}>제어</button>
                             </FormGroup>
                         </div>
                     </PublishBox>

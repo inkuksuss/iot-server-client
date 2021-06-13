@@ -20,13 +20,13 @@ export const dataUser = (req, res) => {
     }, (err, data) => {
         if(err) {
             console.log(err)
-            res.json({ 
+            return res.json({ 
                 success: false,
                 error: err
             })
         }
         console.log(data);
-        res.json({ // 파이썬 파일로부터 처리된 데이터를 클라이언트로 전송
+        return res.json({ // 파이썬 파일로부터 처리된 데이터를 클라이언트로 전송
             success: true,
             data
         })
@@ -142,7 +142,7 @@ export const deviceDetail = async (req, res) => {
         //         dataArray.push(data)
         //     }
         // }
-        res.status(200).
+        return res.status(200).
             json({
                 success: true,
                 avgTmpForm,
@@ -153,7 +153,7 @@ export const deviceDetail = async (req, res) => {
             })
     } catch(err) {
         console.log(err)
-        res.status(204)
+        return res.status(204)
             .json({
                 success: false,
                 data: []

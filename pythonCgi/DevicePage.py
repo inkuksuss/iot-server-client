@@ -40,7 +40,7 @@ for user_key in user_keyList:  # 유저 제품별 데이터 배열화
     # DB 데이터 추출
     df_dht_week = pd.DataFrame(
         list(dht.find({
-            "product": bson_key_id, "measuredAt": {"$gte": current_date - timedelta(weeks=2)}}, {
+            "product": bson_key_id, "measuredAt": {"$gte": current_date - timedelta(weeks=1)}}, {
             "_id": 0, "tmp": 1, "hum": 1, "measuredAt": 1, "key": 1
         }
         ).sort("measuredAt", pymongo.DESCENDING))
@@ -52,7 +52,7 @@ for user_key in user_keyList:  # 유저 제품별 데이터 배열화
 
     df_pms_week = pd.DataFrame(
         list(pms.find({
-            "product": bson_key_id, "measuredAt": {"$gte": current_date - timedelta(weeks=2)}}, {
+            "product": bson_key_id, "measuredAt": {"$gte": current_date - timedelta(weeks=1)}}, {
                 "_id": 0, "dust": 1, "measuredAt": 1, "key": 1
         }
         ).sort("measuredAt", pymongo.DESCENDING))
