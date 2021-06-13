@@ -6,7 +6,7 @@ const FanSchema = new mongoose.Schema({
         required: true,
         default: false
     },
-    on: {
+    turnOn: {
         default: false,
         type: Boolean,
         required: true
@@ -31,6 +31,6 @@ const FanSchema = new mongoose.Schema({
     } // 제품 이름
 });
 
-const model = mongoose.model('Fan', BuzSchema);
+const model = mongoose.model('Fan', FanSchema);
 
 export default model;

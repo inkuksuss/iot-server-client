@@ -33,7 +33,7 @@ const client = mqtt.connect("mqtt://127.0.0.1", {clientId: 'hello'});
 client.on("connect", () => { // mqtt 연결하기
     console.log("😇Mqtt Connect");
     client.subscribe('jb/shilmu/scle/smenco/apsr/+/input/+'); // 읽을 토픽
-    client.subscribe('jb/shilmu/scle/smenco/apsr/+/output/led/res');
+    client.subscribe('jb/shilmu/scle/smenco/apsr/+/output/+/res');
 });
 
 client.on("message", async (topic, message) => { // 구독한 토픽으로부터 데이터 받아오기
@@ -178,19 +178,11 @@ io.on("connection", socket => { // 소켓 연결
         socket.on("publishLED", async(data) => {
             const { Red, Yellow, Green, auto, key, product, controller } = data
             const LedTopic = `jb/shilmu/scle/smenco/apsr/${key}/output/led`; // 퍼블리쉬 토픽
-            const date = new Date(); // 서버에서 전송받은 시간 
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const today = date.getDate();
-            const hours = date.getHours();
-            const mintues = date.getMinutes();
-            const seconds = date.getSeconds();
-            const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
             try {
                 const user = await User.findById(controller)
                 const products = await User.findOne({ keyList: {$in : [ product ]} });
                 const keyCheck = await Product.findById(product)
-                if(user.id === products.id && keyCheck.keyName === String(key)) {
+                if(String(user.id) === String(products.id) && keyCheck.keyName === String(key)) {
                     const verifyData = {
                         Red,
                         Yellow,
@@ -204,11 +196,18 @@ io.on("connection", socket => { // 소켓 연결
                             return console.log(err) // 에러발생시
                         }
                         client.on('message', async(LedTopicRes, response) => { // 에러없다면 콜백토픽 서브
-                            const ledTopic = LedTopicRes.split('/');
-                            if(String(ledTopic[5]) === key && ledTopic[6] === 'output' && ledTopic[7] === 'led' && ledTopic[8] === 'res') {
+                            if(LedTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/led/res`) {
                                 if(response) { // 데이터가 있다면
                                     const result = JSON.parse(response.toString()); // 데이터 파싱
                                     if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                        const date = new Date(); // 서버에서 전송받은 시간 
+                                        const year = date.getFullYear();
+                                        const month = date.getMonth();
+                                        const today = date.getDate();
+                                        const hours = date.getHours();
+                                        const mintues = date.getMinutes();
+                                        const seconds = date.getSeconds();
+                                        const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
                                         const led = await Led.create({
                                             auto: result.auto,
                                             Red: result.Red,
@@ -234,19 +233,11 @@ io.on("connection", socket => { // 소켓 연결
         socket.on("publishFan", async(data) => {
             const { on, auto, key, product, controller } = data
             const fanTopic = `jb/shilmu/scle/smenco/apsr/${key}/output/fan`; // 퍼블리쉬 토픽
-            const date = new Date(); // 서버에서 전송받은 시간 
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const today = date.getDate();
-            const hours = date.getHours();
-            const mintues = date.getMinutes();
-            const seconds = date.getSeconds();
-            const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
             try {
                 const user = await User.findById(controller)
                 const products = await User.findOne({ keyList: {$in : [ product ]} });
                 const keyCheck = await Product.findById(product)
-                if(user.id === products.id && keyCheck.keyName === String(key)) {
+                if(String(user.id) === String(products.id) && keyCheck.keyName === String(key)) {
                     const verifyData = {
                         on,
                         auto,
@@ -258,14 +249,21 @@ io.on("connection", socket => { // 소켓 연결
                             return console.log(err) // 에러발생시
                         }
                         client.on('message', async(fanTopicRes, response) => { // 에러없다면 콜백토픽 서브
-                            const fanTopic = fanTopicRes.split('/');
-                            if(String(fanTopic[5]) === key && fanTopic[6] === 'output' && fanTopic[7] === 'fan' && fanTopic[8] === 'res') {
+                            if(fanTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/fan/res`) {
                                 if(response) { // 데이터가 있다면
                                     const result = JSON.parse(response.toString()); // 데이터 파싱
                                     if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                        const date = new Date(); // 서버에서 전송받은 시간 
+                                        const year = date.getFullYear();
+                                        const month = date.getMonth();
+                                        const today = date.getDate();
+                                        const hours = date.getHours();
+                                        const mintues = date.getMinutes();
+                                        const seconds = date.getSeconds();
+                                        const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
                                         const fan = await Fan.create({
                                             auto: result.auto,
-                                            on: result.on,
+                                            turnOn: result.on,
                                             measuredAt,
                                             controller,
                                             product,
@@ -286,19 +284,11 @@ io.on("connection", socket => { // 소켓 연결
         socket.on("publishBuz", async(data) => {
             const { on, auto, key, product, controller } = data
             const buzTopic = `jb/shilmu/scle/smenco/apsr/${key}/output/buz`; // 퍼블리쉬 토픽
-            const date = new Date(); // 서버에서 전송받은 시간 
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const today = date.getDate();
-            const hours = date.getHours();
-            const mintues = date.getMinutes();
-            const seconds = date.getSeconds();
-            const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
             try {
                 const user = await User.findById(controller)
                 const products = await User.findOne({ keyList: {$in : [ product ]} });
                 const keyCheck = await Product.findById(product)
-                if(user.id === products.id && keyCheck.keyName === String(key)) {
+                if(String(user.id) === String(products.id) && keyCheck.keyName === String(key)) {
                     const verifyData = {
                         on,
                         auto,
@@ -310,14 +300,21 @@ io.on("connection", socket => { // 소켓 연결
                             return console.log(err) // 에러발생시
                         }
                         client.on('message', async(buzTopicRes, response) => { // 에러없다면 콜백토픽 서브
-                            const buzTopic = buzTopicRes.split('/');
-                            if(String(buzTopic[5]) === key && buzTopic[6] === 'output' && buzTopic[7] === 'buz' && buzTopic[8] === 'res') {
+                            if(buzTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/buz`) {
                                 if(response) { // 데이터가 있다면
                                     const result = JSON.parse(response.toString()); // 데이터 파싱
                                     if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                        const date = new Date(); // 서버에서 전송받은 시간 
+                                        const year = date.getFullYear();
+                                        const month = date.getMonth();
+                                        const today = date.getDate();
+                                        const hours = date.getHours();
+                                        const mintues = date.getMinutes();
+                                        const seconds = date.getSeconds();
+                                        const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
                                         const buz = await Buz.create({
                                             auto: result.auto,
-                                            on: result.on,
+                                            turnOn: result.on,
                                             measuredAt,
                                             controller,
                                             product,
@@ -336,36 +333,3 @@ io.on("connection", socket => { // 소켓 연결
             }
         })
 });
-
-// // 클라이언트
-// const topics  =`jb/shilmu/scle/smenco/apsr/3/output/led`;
-// client.on('message', (topics, data) => { // 제어 결과 서브
-//     const parsedData = JSON.parse(data.toString()); // 데이터 파싱
-//     if(parsedData) { // 데이터가 있다면
-//         const result = { // 데이터 객체속 성공여부 포함하여 객체 재생   success: true,
-//             ...parsedData
-//         }
-//         const resultJson = JSON.stringify(result) // 객체 제이슨화
-//         client.publish('jb/shilmu/scle/smenco/apsr/3/output/led/res', resultJson) // 서버로 퍼블리쉬
-//     }
-// })
-
-
-// else if(topicContainer[7] === 'led' && topicContainer[8] === 'res') {
-//     if(obj) { // 데이터가 있다면
-//         if(obj.success) { // 데이터 속 결과가 성공이라면
-//             const led = await Led.create({
-//                 auto: obj.auto,
-//                 Red: obj.Red,
-//                 Yellow: obj.Yellow,
-//                 Green: obj.Green,
-//                 measuredAt: obj.measuredAt,
-//                 controller: obj.controller,
-//                 product: obj.product,
-//                 key: obj.key
-//             });
-//             led.save()
-//             socket.emit('LEDResult', obj); // 웹으로 실시간 결과 전달
-//         }
-//     }
-// }

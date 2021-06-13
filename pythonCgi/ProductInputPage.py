@@ -47,7 +47,7 @@ df_pms = list(
     pms.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lte': convert_endDate}}).sort("measuredAt", pymongo.DESCENDING))
 
 df_dht_date = list(
-    dht.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lt': convert_endDate}},
+    dht.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lte': convert_endDate}},
              {'_id': 0, 'sensor': 0, 'controller': 0, 'key': 0, 'product': 0, '__v': 0, 'tmp': 0, 'hum': 0}))
 
 dic_by_date = {}
@@ -87,12 +87,12 @@ if len(df_dht) != 0 and len(df_pms) != 0:
 
         date_array = pd.date_range(start=convert_date,
                                    end=convert_endDate).tolist()
+        dates_array = []
+        for dates in date_array:
+            if dates.date() not in dht_mean_days.index:
+                date_arrays.append(dates)
 
-        for date in date_array:
-            if date.date() in dht_mean_days.index:
-                date_array.remove(date)
-
-        for date in date_array:
+        for dates in dates_array:
             dht_mean_days.loc[date.date()] = 0
             dht_min_days.loc[date.date()] = 0
             dht_max_days.loc[date.date()] = 0
@@ -150,17 +150,18 @@ if len(df_dht) != 0 and len(df_pms) != 0:
         date_array = pd.date_range(start=convert_date + timedelta(days=1),
                                    end=convert_endDate, freq="3d").tolist()
 
-        for date in date_array:
-            if date.date() in dht_mean_days.index.tolist():
-                date_array.remove(date)
+        dates_array = []
+        for dates in date_array:
+            if dates.date() not in dht_mean_days.index:
+                date_arrays.append(dates)
 
-        for date in date_array:
-            dht_mean_days.loc[date] = 0
-            dht_min_days.loc[date] = 0
-            dht_max_days.loc[date] = 0
-            pms_mean_days.loc[date] = 0
-            pms_min_days.loc[date] = 0
-            pms_max_days.loc[date] = 0
+        for dates in dates_array:
+            dht_mean_days.loc[date.date()] = 0
+            dht_min_days.loc[date.date()] = 0
+            dht_max_days.loc[date.date()] = 0
+            pms_mean_days.loc[date.date()] = 0
+            pms_min_days.loc[date.date()] = 0
+            pms_max_days.loc[date.date()] = 0
 
         sort_dht_mean_days = dht_mean_days.sort_index()
         sort_dht_min_days = dht_min_days.sort_index()
@@ -211,17 +212,18 @@ if len(df_dht) != 0 and len(df_pms) != 0:
         date_array = pd.date_range(start=convert_date,
                                    end=convert_endDate, freq="W-Mon").tolist()
 
-        for date in date_array:
-            if date.date() in dht_mean_days.index.tolist():
-                date_array.remove(date)
+        dates_array = []
+        for dates in date_array:
+            if dates.date() not in dht_mean_days.index:
+                date_arrays.append(dates)
 
-        for date in date_array:
-            dht_mean_days.loc[date] = 0
-            dht_min_days.loc[date] = 0
-            dht_max_days.loc[date] = 0
-            pms_mean_days.loc[date] = 0
-            pms_min_days.loc[date] = 0
-            pms_max_days.loc[date] = 0
+        for dates in dates_array:
+            dht_mean_days.loc[date.date()] = 0
+            dht_min_days.loc[date.date()] = 0
+            dht_max_days.loc[date.date()] = 0
+            pms_mean_days.loc[date.date()] = 0
+            pms_min_days.loc[date.date()] = 0
+            pms_max_days.loc[date.date()] = 0
 
         sort_dht_mean_days = dht_mean_days.sort_index()
         sort_dht_min_days = dht_min_days.sort_index()
@@ -285,17 +287,18 @@ if len(df_dht) != 0 and len(df_pms) != 0:
         date_array = pd.date_range(start=convert_date,
                                    end=convert_endDate, freq="MS").tolist()
 
-        for date in date_array:
-            if date.date() in dht_mean_days.index.tolist():
-                date_array.remove(date)
+        dates_array = []
+        for dates in date_array:
+            if dates.date() not in dht_mean_days.index:
+                date_arrays.append(dates)
 
-        for date in date_array:
-            dht_mean_days.loc[date] = 0
-            dht_min_days.loc[date] = 0
-            dht_max_days.loc[date] = 0
-            pms_mean_days.loc[date] = 0
-            pms_min_days.loc[date] = 0
-            pms_max_days.loc[date] = 0
+        for dates in dates_array:
+            dht_mean_days.loc[date.date()] = 0
+            dht_min_days.loc[date.date()] = 0
+            dht_max_days.loc[date.date()] = 0
+            pms_mean_days.loc[date.date()] = 0
+            pms_min_days.loc[date.date()] = 0
+            pms_max_days.loc[date.date()] = 0
 
         sort_dht_mean_days = dht_mean_days.sort_index()
         sort_dht_min_days = dht_min_days.sort_index()

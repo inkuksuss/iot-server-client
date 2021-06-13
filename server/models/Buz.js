@@ -6,7 +6,7 @@ const BuzSchema = new mongoose.Schema({
         required: true,
         default: false
     },
-    on: {
+    turnOn: {
         default: false,
         type: Boolean,
         required: true
