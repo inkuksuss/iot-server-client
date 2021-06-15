@@ -8,6 +8,8 @@ import Pms from "./models/Pms";
 import Product from './models/Product';
 import User from "./models/User";
 import Led from "./models/Led";
+import Fan from "./models/Fan";
+import Buz from "./models/Buz";
 
 const options = {
     port: 1883,
@@ -329,6 +331,109 @@ io.on("connection", socket => { // 소켓 연결
                     });
                 }
             } catch(err) {
+                console.log(err);
+            }
+        })
+        socket.on('publishAuto', async(data) => {
+            const { auto, key, product, controller } = data
+            const ledTopic = `jb/shilmu/scle/smenco/apsr/${key}/output/led`; // 퍼블리쉬 토픽
+            const fanTopic = `jb/shilmu/scle/smenco/apsr/${key}/output/fan`; // 퍼블리쉬 토픽
+            const buzTopic = `jb/shilmu/scle/smenco/apsr/${key}/output/buz`; // 퍼블리쉬 토픽
+            try {
+                const user = await User.findById(controller)
+                const products = await User.findOne({ keyList: {$in : [ product ]} });
+                const keyCheck = await Product.findById(product)
+                if(String(user.id) === String(products.id) && keyCheck.keyName === String(key)) {
+                    const verifyData = {
+                        auto,
+                        key
+                    }
+                    const autoJson = JSON.stringify(verifyData); // 웹에서 받은 데이터 제이슨화
+                    client.publish([ledTopic, fanTopic, buzTopic], autoJson, (err) => { // 퍼블리쉬
+                        if(err) {
+                            return console.log(err) // 에러발생시
+                        }
+                        client.on('message', async(buzTopicRes, response) => { // 에러없다면 콜백토픽 서브
+                            if(buzTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/buz`) {
+                                if(response) { // 데이터가 있다면
+                                    const result = JSON.parse(response.toString()); // 데이터 파싱
+                                    if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                        const date = new Date(); // 서버에서 전송받은 시간 
+                                        const year = date.getFullYear();
+                                        const month = date.getMonth();
+                                        const today = date.getDate();
+                                        const hours = date.getHours();
+                                        const mintues = date.getMinutes();
+                                        const seconds = date.getSeconds();
+                                        const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
+                                        const buz = await Buz.create({
+                                            auto: result.auto,
+                                            turnOn: result.on,
+                                            measuredAt,
+                                            controller,
+                                            product,
+                                            key
+                                        })                    
+                                        buz.save();
+                                        socket.emit('buzResult', result); // 웹으로 실시간 결과 전달
+                                    }
+                                }
+                            }
+                            if(ledTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/led`) {
+                                if(response) { // 데이터가 있다면
+                                    const result = JSON.parse(response.toString()); // 데이터 파싱
+                                    if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                        const date = new Date(); // 서버에서 전송받은 시간 
+                                        const year = date.getFullYear();
+                                        const month = date.getMonth();
+                                        const today = date.getDate();
+                                        const hours = date.getHours();
+                                        const mintues = date.getMinutes();
+                                        const seconds = date.getSeconds();
+                                        const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
+                                        const led = await Led.create({
+                                            auto: result.auto,
+                                            Red: result.Red,
+                                            Green: result.Green,
+                                            Yellow: result.Yellow,
+                                            measuredAt,
+                                            controller,
+                                            product,
+                                            key
+                                        })                    
+                                        led.save();
+                                        socket.emit('ledResult', result); // 웹으로 실시간 결과 전달
+                                    }
+                                }
+                            }
+                            if(fanTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/fan`) {
+                                if(response) { // 데이터가 있다면
+                                    const result = JSON.parse(response.toString()); // 데이터 파싱
+                                    if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                        const date = new Date(); // 서버에서 전송받은 시간 
+                                        const year = date.getFullYear();
+                                        const month = date.getMonth();
+                                        const today = date.getDate();
+                                        const hours = date.getHours();
+                                        const mintues = date.getMinutes();
+                                        const seconds = date.getSeconds();
+                                        const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
+                                        const fan = await Fan.create({
+                                            auto: result.auto,
+                                            turnOn: result.on,
+                                            measuredAt,
+                                            controller,
+                                            product,
+                                            key
+                                        })                    
+                                        fan.save();
+                                        socket.emit('fanResult', result); // 웹으로 실시간 결과 전달
+                                    }
+                                }
+                            }
+                        });
+                    });
+            }} catch (err) {
                 console.log(err);
             }
         })

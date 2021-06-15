@@ -18,7 +18,7 @@ function ProductDetail(props) {
             <Td>{props.measuredAt ? props.measuredAt.split('T')[0] + " | " + props.measuredAt.split('T')[1].split('.000Z')[0] : null}</Td>
             <Td>{props.tmp}°C</Td>
             <Td>{props.hum}%</Td>
-            <Td>{props.dust}㎛</Td>
+            <Td>{props.dust}µg/m³</Td>
         </Tr>
     )
     

@@ -829,6 +829,42 @@ function ProductPage(props) {
             }
         });
     };
+    
+    const publishAuto = (event) => {
+        const {
+            target: { value, name }
+        } = event;
+        const data = { 'auto': true };
+        const userId = window.localStorage.getItem('id');
+        data['key'] = value;
+        data['product'] = name;
+        data['controller'] = userId;
+        socket.emit("publishAuto", data)
+        socket.on('ledResult', result => {
+            if(result.success) {
+                setLedStatus({
+                    ...ledStatus, 
+                    ...result
+                })
+            }
+        });
+        socket.on('buzResult', result => {
+            if(result.success) {
+                setBuzStatus({
+                    ...buzStatus, 
+                    ...result
+                })
+            }
+        });
+        socket.on('fanResult', result => {
+            if(result.success) {
+                setFanStatus({
+                    ...fanStatus, 
+                    ...result
+                })
+            }
+        });
+    }
 
     const handleCheck = () => {
         setAutoChecked(!AutoChecked);
@@ -937,7 +973,7 @@ function ProductPage(props) {
                                 control={<IOSSwitch checked={AutoChecked} onChange={handleCheck} name="AutoChecked" />}
                                 label="AUTO"
                                 />
-                            <div>{AutoChecked ? null : (
+                            <div>{AutoChecked ? (<button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishAuto}>Auto</button>) : (
                                 <>
                                     <FormGroup>
                                         <FormControlLabel
@@ -961,7 +997,7 @@ function ProductPage(props) {
                                         label="Buz"
                                         />
                                     </FormGroup>
-                                    <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishLed}>LED제어</button>
+                                    <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishLed}>Led제어</button>
                                     <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishFan}>Fan제어</button>
                                     <button type="submit" name={socketData.product} value={socketData.keyName} onClick={publishBuz}>Buz제어</button>
                                 </>
