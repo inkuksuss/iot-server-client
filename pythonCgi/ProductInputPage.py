@@ -42,12 +42,12 @@ int_period = int(period.days)
 
 # 데이터 처리
 df_dht = list(
-    dht.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lte': convert_endDate}}).sort("measuredAt", pymongo.DESCENDING))
+    dht.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lte': convert_endDate + timedelta(days=1)}}).sort("measuredAt", pymongo.DESCENDING))
 df_pms = list(
-    pms.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lte': convert_endDate}}).sort("measuredAt", pymongo.DESCENDING))
+    pms.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lte': convert_endDate + timedelta(days=1)}}).sort("measuredAt", pymongo.DESCENDING))
 
 df_dht_date = list(
-    dht.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lte': convert_endDate}},
+    dht.find({'product': bson_id, 'measuredAt': {'$gte': convert_date, '$lte': convert_endDate + timedelta(days=1)}},
              {'_id': 0, 'sensor': 0, 'controller': 0, 'key': 0, 'product': 0, '__v': 0, 'tmp': 0, 'hum': 0}))
 
 dic_by_date = {}
@@ -274,26 +274,15 @@ if len(df_dht) != 0 and len(df_pms) != 0:
     json_by_date = dumps(dic_by_date)
     print(json_by_date)  # 종류별 평균, 최대, 최소 정렬
 
-    new_array = []
-
+    # 실제
     for dht in df_dht:
-        dht['dust'] = 15
+        for pms in df_pms:
+            if dht['measuredAt'] == pms['measuredAt']:
+                dht['dust'] = pms['dust']
+                new_array.append(dht)
 
-    json_new_Array = dumps(df_dht)
-    print(json_new_Array)  # 기간 전체 데이터
-
-
-#     # 실제
-#     # for dht in df_dht:
-#     #     for pms in df_pms:
-#     #         if dht['measuredAt'] == pms['measuredAt']:
-#     #             dht['dust'] = pms['dust']
-#     #             new_array.append(dht)
-
-#     # json_new_Array = dumps(new_array)
-#     # print(json_new_Array)
-
-#     # //////////////////////
+    json_new_Array = dumps(new_array)
+    print(json_new_Array)
 
 
 else:
