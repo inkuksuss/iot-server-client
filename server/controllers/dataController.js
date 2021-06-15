@@ -199,10 +199,10 @@ export const postDateData = (req, res) => {
         };
         const convertYear = koreaDate.getFullYear()
         const convertMonth = koreaDate.getMonth()
-        const convertDay = koreaDate.getDate()
+        const convertDay = koreaDate.getDate()-1
         const convertEndYear = koreaEndDate.getFullYear()
         const convertEndMonth = koreaEndDate.getMonth()
-        const convertEndDay = koreaEndDate.getDate()
+        const convertEndDay = koreaEndDate.getDate()-1
         convertDate = `${convertYear}-${convertMonth < 10 ? `0${convertMonth}` : `${convertMonth}`}-${convertDay < 10 ? `0${convertDay}` : `${convertDay}`}`
         convertEndDate = `${convertEndYear}-${convertEndMonth < 10 ? `0${convertEndMonth}` : `${convertEndMonth}`}-${convertEndDay < 10 ? `0${convertEndDay}` : `${convertEndDay}`}`
     }

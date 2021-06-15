@@ -349,37 +349,12 @@ io.on("connection", socket => { // 소켓 연결
                         key
                     }
                     const autoJson = JSON.stringify(verifyData); // 웹에서 받은 데이터 제이슨화
-                    client.publish([ledTopic, fanTopic, buzTopic], autoJson, (err) => { // 퍼블리쉬
+                    client.publish(ledTopic, autoJson, (err) => { // 퍼블리쉬
                         if(err) {
                             return console.log(err) // 에러발생시
                         }
-                        client.on('message', async(buzTopicRes, response) => { // 에러없다면 콜백토픽 서브
-                            if(buzTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/buz`) {
-                                if(response) { // 데이터가 있다면
-                                    const result = JSON.parse(response.toString()); // 데이터 파싱
-                                    if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
-                                        const date = new Date(); // 서버에서 전송받은 시간 
-                                        const year = date.getFullYear();
-                                        const month = date.getMonth();
-                                        const today = date.getDate();
-                                        const hours = date.getHours();
-                                        const mintues = date.getMinutes();
-                                        const seconds = date.getSeconds();
-                                        const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
-                                        const buz = await Buz.create({
-                                            auto: result.auto,
-                                            turnOn: result.on,
-                                            measuredAt,
-                                            controller,
-                                            product,
-                                            key
-                                        })                    
-                                        buz.save();
-                                        socket.emit('buzResult', result); // 웹으로 실시간 결과 전달
-                                    }
-                                }
-                            }
-                            if(ledTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/led`) {
+                        client.on('message', async(ledTopicRes, response) => { // 에러없다면 콜백토픽 서브
+                            if(ledTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/led/res`) {
                                 if(response) { // 데이터가 있다면
                                     const result = JSON.parse(response.toString()); // 데이터 파싱
                                     if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
@@ -402,35 +377,77 @@ io.on("connection", socket => { // 소켓 연결
                                             key
                                         })                    
                                         led.save();
+                                        console.log(led);
                                         socket.emit('ledResult', result); // 웹으로 실시간 결과 전달
                                     }
                                 }
                             }
-                            if(fanTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/fan`) {
-                                if(response) { // 데이터가 있다면
-                                    const result = JSON.parse(response.toString()); // 데이터 파싱
-                                    if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
-                                        const date = new Date(); // 서버에서 전송받은 시간 
-                                        const year = date.getFullYear();
-                                        const month = date.getMonth();
-                                        const today = date.getDate();
-                                        const hours = date.getHours();
-                                        const mintues = date.getMinutes();
-                                        const seconds = date.getSeconds();
-                                        const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
-                                        const fan = await Fan.create({
-                                            auto: result.auto,
-                                            turnOn: result.on,
-                                            measuredAt,
-                                            controller,
-                                            product,
-                                            key
-                                        })                    
-                                        fan.save();
-                                        socket.emit('fanResult', result); // 웹으로 실시간 결과 전달
+                        });
+                        client.publish(fanTopic, autoJson, (err) => { // 퍼블리쉬
+                            if(err) {
+                                return console.log(err) // 에러발생시
+                            }
+                            client.on('message', async(fanTopicRes, response) => { // 에러없다면 콜백토픽 서브
+                                if(fanTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/fan/res`) {
+                                    if(response) { // 데이터가 있다면
+                                        const result = JSON.parse(response.toString()); // 데이터 파싱
+                                        if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                            const date = new Date(); // 서버에서 전송받은 시간 
+                                            const year = date.getFullYear();
+                                            const month = date.getMonth();
+                                            const today = date.getDate();
+                                            const hours = date.getHours();
+                                            const mintues = date.getMinutes();
+                                            const seconds = date.getSeconds();
+                                            const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
+                                            const fan = await Fan.create({
+                                                auto: result.auto,
+                                                turnOn: result.on,
+                                                measuredAt,
+                                                controller,
+                                                product,
+                                                key
+                                            })                    
+                                            fan.save();
+                                            console.log(fan);
+                                            socket.emit('fanResult', result); // 웹으로 실시간 결과 전달
+                                        }
                                     }
                                 }
-                            }
+                            })
+                            client.publish(buzTopic, autoJson, (err) => { // 퍼블리쉬
+                                if(err) {
+                                    return console.log(err) // 에러발생시
+                                }
+                                client.on('message', async(buzTopicRes, response) => { // 에러없다면 콜백토픽 서브
+                                    if(buzTopicRes === `jb/shilmu/scle/smenco/apsr/${key}/output/buz/res`) {
+                                        if(response) { // 데이터가 있다면
+                                            const result = JSON.parse(response.toString()); // 데이터 파싱
+                                            if(result.success && result.key === key) { // 데이터 속 결과가 성공이라면
+                                                const date = new Date(); // 서버에서 전송받은 시간 
+                                                const year = date.getFullYear();
+                                                const month = date.getMonth();
+                                                const today = date.getDate();
+                                                const hours = date.getHours();
+                                                const mintues = date.getMinutes();
+                                                const seconds = date.getSeconds();
+                                                const measuredAt = new Date(Date.UTC(year, month, today, hours, mintues, seconds));
+                                                const buz = await Buz.create({
+                                                    auto: result.auto,
+                                                    turnOn: result.on,
+                                                    measuredAt,
+                                                    controller,
+                                                    product,
+                                                    key
+                                                })                    
+                                                buz.save();
+                                                console.log(buz);
+                                                socket.emit('buzResult', result); // 웹으로 실시간 결과 전달
+                                            }
+                                        }
+                                    }
+                                })
+                            })
                         });
                     })
                 }
@@ -439,3 +456,5 @@ io.on("connection", socket => { // 소켓 연결
             }
         })
 });
+
+
