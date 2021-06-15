@@ -85,7 +85,7 @@ if len(df_dht) != 0 and len(df_pms) != 0:
         pms_max_days = pd_df_pms.groupby(
             pd_df_pms.set_index('measuredAt').index.date).max()
 
-        date_array = pd.date_range(start=convert_date,
+        date_array = pd.date_range(start=convert_date + timedelta(days=1),
                                    end=convert_endDate).tolist()
         dates_array = []
         for dates in date_array:
@@ -135,33 +135,17 @@ if len(df_dht) != 0 and len(df_pms) != 0:
     elif 7 < int_period <= 29:
 
         dht_mean_days = pd_df_dht.resample('3D', on='measuredAt')[
-            'tmp', 'hum'].mean()
+            'tmp', 'hum'].mean().dropna(axis=0)
         dht_min_days = pd_df_dht.resample('3D', on='measuredAt')[
-            'tmp', 'hum'].min()
+            'tmp', 'hum'].min().dropna(axis=0)
         dht_max_days = pd_df_dht.resample('3D', on='measuredAt')[
-            'tmp', 'hum'].max()
+            'tmp', 'hum'].max().dropna(axis=0)
         pms_mean_days = pd_df_pms.resample(
-            '3D', on='measuredAt')['dust'].mean()
+            '3D', on='measuredAt')['dust'].mean().dropna(axis=0)
         pms_min_days = pd_df_pms.resample(
-            '3D', on='measuredAt')['dust'].min()
+            '3D', on='measuredAt')['dust'].min().dropna(axis=0)
         pms_max_days = pd_df_pms.resample(
-            '3D', on='measuredAt')['dust'].max()
-
-        date_array = pd.date_range(start=convert_date + timedelta(days=1),
-                                   end=convert_endDate, freq="3d").tolist()
-
-        dates_array = []
-        for dates in date_array:
-            if dates.date() not in dht_mean_days.index:
-                dates_array.append(dates)
-
-        for dates in dates_array:
-            dht_mean_days.loc[dates] = 0
-            dht_min_days.loc[dates] = 0
-            dht_max_days.loc[dates] = 0
-            pms_mean_days.loc[dates] = 0
-            pms_min_days.loc[dates] = 0
-            pms_max_days.loc[dates] = 0
+            '3D', on='measuredAt')['dust'].max().dropna(axis=0)
 
         sort_dht_mean_days = dht_mean_days.sort_index()
         sort_dht_min_days = dht_min_days.sort_index()
@@ -172,19 +156,19 @@ if len(df_dht) != 0 and len(df_pms) != 0:
 
         dic_by_date = {
             'mean': {
-                'tmp': sort_dht_mean_days['tmp'].tolist(),
-                'hum': sort_dht_mean_days['hum'].tolist(),
-                'dust': sort_pms_mean_days.tolist()
+                'tmp': sort_dht_mean_days['tmp'].round(1).tolist(),
+                'hum': sort_dht_mean_days['hum'].round(1).tolist(),
+                'dust': sort_pms_mean_days.round(1).tolist()
             },
             'min': {
-                'tmp': sort_dht_min_days['tmp'].tolist(),
-                'hum': sort_dht_min_days['hum'].tolist(),
-                'dust': sort_pms_min_days.tolist()
+                'tmp': sort_dht_min_days['tmp'].round(1).tolist(),
+                'hum': sort_dht_min_days['hum'].round(1).tolist(),
+                'dust': sort_pms_min_days.round(1).tolist()
             },
             'max': {
-                'tmp': sort_dht_max_days['tmp'].tolist(),
-                'hum': sort_dht_max_days['hum'].tolist(),
-                'dust': sort_pms_max_days.tolist()
+                'tmp': sort_dht_max_days['tmp'].round(1).tolist(),
+                'hum': sort_dht_max_days['hum'].round(1).tolist(),
+                'dust': sort_pms_max_days.round(1).tolist()
             }
         }
 
@@ -197,33 +181,17 @@ if len(df_dht) != 0 and len(df_pms) != 0:
 
     elif 29 < int_period <= 93:
         dht_mean_days = pd_df_dht.resample('W-Mon', on='measuredAt')[
-            'tmp', 'hum'].mean()
+            'tmp', 'hum'].mean().dropna(axis=0)
         dht_min_days = pd_df_dht.resample('W-Mon', on='measuredAt')[
-            'tmp', 'hum'].min()
+            'tmp', 'hum'].min().dropna(axis=0)
         dht_max_days = pd_df_dht.resample('W-Mon', on='measuredAt')[
-            'tmp', 'hum'].max()
+            'tmp', 'hum'].max().dropna(axis=0)
         pms_mean_days = pd_df_pms.resample(
-            'W-Mon', on='measuredAt')['dust'].mean()
+            'W-Mon', on='measuredAt')['dust'].mean().dropna(axis=0)
         pms_min_days = pd_df_pms.resample(
-            'W-Mon', on='measuredAt')['dust'].min()
+            'W-Mon', on='measuredAt')['dust'].min().dropna(axis=0)
         pms_max_days = pd_df_pms.resample(
-            'W-Mon', on='measuredAt')['dust'].max()
-
-        date_array = pd.date_range(start=convert_date,
-                                   end=convert_endDate, freq="W-Mon").tolist()
-
-        dates_array = []
-        for dates in date_array:
-            if dates.date() not in dht_mean_days.index:
-                dates_array.append(dates)
-
-        for dates in dates_array:
-            dht_mean_days.loc[dates] = 0
-            dht_min_days.loc[dates] = 0
-            dht_max_days.loc[dates] = 0
-            pms_mean_days.loc[dates] = 0
-            pms_min_days.loc[dates] = 0
-            pms_max_days.loc[dates] = 0
+            'W-Mon', on='measuredAt')['dust'].max().dropna(axis=0)
 
         sort_dht_mean_days = dht_mean_days.sort_index()
         sort_dht_min_days = dht_min_days.sort_index()
@@ -234,19 +202,19 @@ if len(df_dht) != 0 and len(df_pms) != 0:
 
         dic_by_date = {
             'mean': {
-                'tmp': sort_dht_mean_days['tmp'].tolist(),
-                'hum': sort_dht_mean_days['hum'].tolist(),
-                'dust': sort_pms_mean_days.tolist()
+                'tmp': sort_dht_mean_days['tmp'].round(1).tolist(),
+                'hum': sort_dht_mean_days['hum'].round(1).tolist(),
+                'dust': sort_pms_mean_days.round(1).tolist()
             },
             'min': {
-                'tmp': sort_dht_min_days['tmp'].tolist(),
-                'hum': sort_dht_min_days['hum'].tolist(),
-                'dust': sort_pms_min_days.tolist()
+                'tmp': sort_dht_min_days['tmp'].round(1).tolist(),
+                'hum': sort_dht_min_days['hum'].round(1).tolist(),
+                'dust': sort_pms_min_days.round(1).tolist()
             },
             'max': {
-                'tmp': sort_dht_max_days['tmp'].tolist(),
-                'hum': sort_dht_max_days['hum'].tolist(),
-                'dust': sort_pms_max_days.tolist()
+                'tmp': sort_dht_max_days['tmp'].round(1).tolist(),
+                'hum': sort_dht_max_days['hum'].round(1).tolist(),
+                'dust': sort_pms_max_days.round(1).tolist()
             }
         }
 
@@ -258,47 +226,18 @@ if len(df_dht) != 0 and len(df_pms) != 0:
         print(dumps(date_container))  # 날짜 목록
 
     else:
-        dht_mean_days = pd_df_dht.groupby(
-            pd_df_dht.set_index('measuredAt').index.month).mean()
-        dht_min_days = pd_df_dht.groupby(
-            pd_df_dht.set_index('measuredAt').index.month).min()
-        dht_max_days = pd_df_dht.groupby(
-            pd_df_dht.set_index('measuredAt').index.month).max()
-        pms_mean_days = pd_df_pms.groupby(
-            pd_df_pms.set_index('measuredAt').index.month).mean()
-        pms_min_days = pd_df_pms.groupby(
-            pd_df_pms.set_index('measuredAt').index.month).min()
-        pms_max_days = pd_df_pms.groupby(
-            pd_df_pms.set_index('measuredAt').index.month).max()
-
         dht_mean_days = pd_df_dht.resample('MS', on='measuredAt')[
-            'tmp', 'hum'].mean()
+            'tmp', 'hum'].mean().dropna(axis=0)
         dht_min_days = pd_df_dht.resample('MS', on='measuredAt')[
-            'tmp', 'hum'].min()
+            'tmp', 'hum'].min().dropna(axis=0)
         dht_max_days = pd_df_dht.resample('MS', on='measuredAt')[
-            'tmp', 'hum'].max()
+            'tmp', 'hum'].max().dropna(axis=0)
         pms_mean_days = pd_df_pms.resample(
-            'MS', on='measuredAt')['dust'].mean()
+            'MS', on='measuredAt')['dust'].mean().dropna(axis=0)
         pms_min_days = pd_df_pms.resample(
-            'MS', on='measuredAt')['dust'].min()
+            'MS', on='measuredAt')['dust'].min().dropna(axis=0)
         pms_max_days = pd_df_pms.resample(
-            'MS', on='measuredAt')['dust'].max()
-
-        date_array = pd.date_range(start=convert_date,
-                                   end=convert_endDate, freq="MS").tolist()
-
-        dates_array = []
-        for dates in date_array:
-            if dates.date() not in dht_mean_days.index:
-                dates_array.append(dates)
-
-        for dates in dates_array:
-            dht_mean_days.loc[dates] = 0
-            dht_min_days.loc[dates] = 0
-            dht_max_days.loc[dates] = 0
-            pms_mean_days.loc[dates] = 0
-            pms_min_days.loc[dates] = 0
-            pms_max_days.loc[dates] = 0
+            'MS', on='measuredAt')['dust'].max().dropna(axis=0)
 
         sort_dht_mean_days = dht_mean_days.sort_index()
         sort_dht_min_days = dht_min_days.sort_index()
@@ -309,19 +248,19 @@ if len(df_dht) != 0 and len(df_pms) != 0:
 
         dic_by_date = {
             'mean': {
-                'tmp': sort_dht_mean_days['tmp'].tolist(),
-                'hum': sort_dht_mean_days['hum'].tolist(),
-                'dust': sort_pms_mean_days.tolist()
+                'tmp': sort_dht_mean_days['tmp'].round(1).tolist(),
+                'hum': sort_dht_mean_days['hum'].round(1).tolist(),
+                'dust': sort_pms_mean_days.round(1).tolist()
             },
             'min': {
-                'tmp': sort_dht_min_days['tmp'].tolist(),
-                'hum': sort_dht_min_days['hum'].tolist(),
-                'dust': sort_pms_min_days.tolist()
+                'tmp': sort_dht_min_days['tmp'].round(1).tolist(),
+                'hum': sort_dht_min_days['hum'].round(1).tolist(),
+                'dust': sort_pms_min_days.round(1).tolist()
             },
             'max': {
-                'tmp': sort_dht_max_days['tmp'].tolist(),
-                'hum': sort_dht_max_days['hum'].tolist(),
-                'dust': sort_pms_max_days.tolist()
+                'tmp': sort_dht_max_days['tmp'].round(1).tolist(),
+                'hum': sort_dht_max_days['hum'].round(1).tolist(),
+                'dust': sort_pms_max_days.round(1).tolist()
             }
         }
 
