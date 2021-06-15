@@ -23,6 +23,7 @@ const Input = styled.input`
     border-bottom: 1px solid #FFAFBD;
     width: 100%;
     height: 36px;
+    margin-bottom: 6px;
     font-size: 26px;
     &:focus {
         outline: none;
@@ -37,7 +38,7 @@ const Button = styled.button`
     color: black;
     border: 1px solid black;
     background-color: #FFFFFF;
-    padding: 5px 0px;
+    padding: 10px 0px;
     transition: background-color 0.2s linear;
     &:hover {
         color: white;

@@ -62,7 +62,7 @@ export default withRouter((props) => {
                     props.history.push('/login');
                     setTimeout(() => {
                         window.location.replace('/login')
-                    }, 1000);
+                    }, 300);
                 } else {
                     alert('로그아웃 실패');
                 }

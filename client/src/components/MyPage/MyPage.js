@@ -18,7 +18,6 @@ const a = keyframes`
 `;
 
 const Container = styled.div`
-    /* background: linear-gradient(to right, #ffc3a0 0%, #FFAFBD 100%); */
     background-color: #FFFFFF;
     width: 100%;
     height: 100vh;

@@ -5,7 +5,7 @@ import routes from '../routes';
 
 const userRouter = express.Router();
 
-userRouter.post(routes.changePassword, jwtMiddleware, postChangePassword);
+userRouter.post(routes.changePassword(), jwtMiddleware, postChangePassword);
 
 userRouter.post(routes.addKey, jwtMiddleware, postAddKey);
 

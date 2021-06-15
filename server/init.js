@@ -432,8 +432,9 @@ io.on("connection", socket => { // 소켓 연결
                                 }
                             }
                         });
-                    });
-            }} catch (err) {
+                    })
+                }
+            } catch (err) {
                 console.log(err);
             }
         })

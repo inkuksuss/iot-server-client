@@ -15,6 +15,43 @@ const Container = styled.div`
     align-items: center;
 `;
 
+const Input = styled.input`
+    font-weight: 300;
+    border: 0;
+    border-bottom: 1px solid #ffa751;
+    width: 100%;
+    height: 36px;
+    font-size: 26px;
+    margin-bottom: 6px;
+    &:focus {
+        outline: none;
+        box-shadow:none;
+        background:#ffa751;
+    }
+`;
+
+const Button = styled.button`
+    width: 100%;
+    text-decoration: none;
+    color: black;
+    border: 1px solid black;
+    background-color: #FFFFFF;
+    padding: 10px 0px;
+    transition: background-color 0.2s linear;
+    &:hover {
+        color: white;
+        background-color: #ffa751;
+        opacity: 0.3;
+    }
+    border-radius: 30px;
+`;
+
+const Label = styled.label`
+    color:#888;
+    font-size: 24px;
+`;
+
+
 function JoinPage(props) {
     const dispatch = useDispatch();
     
@@ -75,25 +112,25 @@ function JoinPage(props) {
             <form style={{ display: 'flex', flexDirection: 'column' }}
                 onSubmit={onSubmitHandler}
             >
-                <label>이메일</label>
-                <input type="email" value={Email} onChange={onEmailHandler} />
+                <Label>이메일</Label>
+                <Input type="email" value={Email} onChange={onEmailHandler} />
 
-                <label>이름</label>
-                <input type="text" value={Name} onChange={onNameHandler} />
+                <Label>이름</Label>
+                <Input type="text" value={Name} onChange={onNameHandler} />
 
-                <label>비밀번호</label>
-                <input type="password" value={Password} onChange={onPasswordHandler} />
+                <Label>비밀번호</Label>
+                <Input type="password" value={Password} onChange={onPasswordHandler} />
 
-                <label>비밀번호 확인</label>
-                <input type="password" value={ConfirmPassword} onChange={onConfirmPasswordHandler} />
+                <Label>비밀번호 확인</Label>
+                <Input type="password" value={ConfirmPassword} onChange={onConfirmPasswordHandler} />
 
-                <label>제품 번호</label>
-                <input type="text" value={Key} onChange={onKeyHandler} />
+                <Label>제품 번호</Label>
+                <Input type="text" value={Key} onChange={onKeyHandler} />
 
                 <br />
-                <button type="submit">
+                <Button type="submit">
                     회원 가입
-                </button>
+                </Button>
             </form>
             </Swing>
         </Container>
